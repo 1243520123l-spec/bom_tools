@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>样机SN二维码智能生成工具</title>
+    
+    <!-- 国内CDN加速 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.5.0/build/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    
+    <!-- 通用样式 -->
+    <link href="assets/css/common.css" rel="stylesheet">
+    
+    <style>
+        /* 页面特定样式 */
+        .drop-zone { 
+            border: 2px dashed var(--border-dark); 
+            border-radius: var(--radius-md); 
+            padding: 40px 20px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative; 
+            background: var(--bg-light); 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .drop-zone:hover, .drop-zone.dragover { 
+            border-color: var(--primary-color); 
+            background: var(--bg-color);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .drop-zone input { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            opacity: 0; 
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .drop-zone .icon-upload { 
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            fill: var(--primary-light);
+        }
+        
+        .upload-text {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .upload-hint {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
+        .file-info-custom {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: var(--success-light);
+            color: var(--success-color);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+        }
+        
+        .file-info-custom.active { display: block; }
+        
+        .log-container-custom {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .log-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .log-area-custom {
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-narrow">
+    <!-- 页面头部 -->
+    <header class="page-header">
+        <h1>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
+            样机SN二维码智能生成工具
+        </h1>
+        <p class="subtitle">自动读取Excel内容，批量生成二维码并导出成Word</p>
+        <div class="nav-btn-group">
+            <a href="index.html" class="btn-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                返回首页
+            </a>
+        </div>
+    </header>
+
+    <!-- 文件上传区域 -->
+    <div class="card card-border-primary">
+        <div class="card-header">
+            <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                上传Excel文件
+            </h3>
+        </div>
+        <div class="card-body">
+            <label class="drop-zone" id="dropZone">
+                <input type="file" id="fileInput" accept=".xlsx, .xls">
+                <svg class="icon-upload" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.6 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                <span class="upload-text" id="uploadText">点击或拖拽 Excel 文件到这里</span>
+                <span class="upload-hint">支持 .xlsx 和 .xls 格式</span>
+                <div id="fileInfo" class="file-info-custom"></div>
+            </label>
+        </div>
+    </div>
+
+    <!-- 设置区域 -->
+    <div class="card card-border-secondary">
+        <div class="card-header">
+            <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L5.08 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                生成设置
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px;"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg>
+                        Word排版列数
+                    </label>
+                    <input type="number" id="colCount" class="form-control" value="6" min="1" max="10">
+                    <div class="hint-text">建议范围 6-8 列，自动调整图片大小</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px;"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 18V6h16v12H4z"/></svg>
+                        样机SN所在列
+                    </label>
+                    <input type="number" id="dataCol" class="form-control" value="4" min="1">
+                    <div class="hint-text">例如 D 列则填 4</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px;"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                        项目名称所在列
+                    </label>
+                    <input type="number" id="nameCol" class="form-control" value="7" min="1">
+                    <div class="hint-text">例如 G 列则填 7</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <button id="processBtn" class="btn btn-primary btn-lg btn-block" disabled>
+        <span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>
+        等待上传文件...
+    </button>
+
+    <!-- 日志区域 -->
+    <div class="log-container-custom mb-5">
+        <div class="log-title">
+            <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                运行日志
+            </span>
+            <span class="badge badge-secondary" id="statusBadge">等待操作</span>
+        </div>
+        <div id="logArea" class="log-area-custom">请先上传 Excel 文件...</div>
+    </div>
+</div>
+
+<!-- 通用JS -->
+<script src="assets/js/common.js"></script>
+
+<script>
+    // 全局变量
+    let selectedFile = null;
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const uploadText = document.getElementById('uploadText');
+    const processBtn = document.getElementById('processBtn');
+    const logArea = document.getElementById('logArea');
+    const statusBadge = document.getElementById('statusBadge');
+
+    // UI 交互逻辑：拖拽效果
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    // 文件选择逻辑
+    dropZone.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', (e) => handleFiles(e.target.files), false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+    }
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            selectedFile = files[0];
+            if (!selectedFile.name.match(/\.(xlsx|xls)$/)) {
+                BOMUtils.showNotification('error', '请选择 Excel 文件 (.xlsx 或 .xls)');
+                return;
+            }
+            updateFileInfo(selectedFile.name);
+            processBtn.disabled = false;
+            processBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M13 13v8h-2v-8H9.5L12 9.5 14.5 13H13zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                开始处理
+            `;
+            statusBadge.className = 'badge badge-success';
+            statusBadge.textContent = '就绪';
+            log(`已加载文件: ${selectedFile.name}`, true);
+            BOMUtils.showNotification('success', '文件上传成功！');
+        }
+    }
+
+    function updateFileInfo(name) {
+        fileInfo.classList.add('active');
+        uploadText.textContent = '文件已就绪';
+        fileInfo.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <strong>${name}</strong>
+        `;
+    }
+
+    function log(msg, clear = false) {
+        if (clear) logArea.innerHTML = '';
+        const time = new Date().toLocaleTimeString('zh-CN', {hour12: false});
+        const isError = msg.includes('错误') || msg.includes('❌');
+        const isSuccess = msg.includes('完成') || msg.includes('✅');
+        const color = isError ? 'var(--danger-color)' : isSuccess ? 'var(--success-color)' : 'var(--text-secondary)';
+        logArea.innerHTML += `<div><span style="color:var(--text-muted)">[${time}]</span> <span style="color:${color}">${msg}</span></div>`;
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    // 辅助：Base64 转 ArrayBuffer
+    function dataURLToArrayBuffer(dataURL) {
+        const binaryString = window.atob(dataURL.split(',')[1]);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    // 主处理逻辑
+    processBtn.addEventListener('click', async function() {
+        if (!selectedFile) return;
+        
+        const config = {
+            colContent: parseInt(document.getElementById('dataCol').value) - 1,
+            colName: parseInt(document.getElementById('nameCol').value) - 1,
+            tableCols: parseInt(document.getElementById('colCount').value)
+        };
+
+        if (config.tableCols < 1) config.tableCols = 1;
+
+        processBtn.disabled = true;
+        processBtn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span> 处理中...';
+        statusBadge.className = 'badge badge-warning';
+        statusBadge.textContent = '处理中';
+        log("正在解析 Excel...", true);
+
+        try {
+            const data = await readExcel(selectedFile);
+            
+            if (data.length === 0) throw new Error("Excel 文件是空的");
+            
+            const qrDataList = [];
+            const zip = new JSZip();
+            const imgFolder = zip.folder("二维码图片");
+
+            log(`共读取到 ${data.length} 行数据，开始生成二维码...`);
+
+            for (let i = 0; i < data.length; i++) {
+                const row = data[i];
+                if (!row) continue;
+
+                const content = row[config.colContent] ? String(row[config.colContent]).trim() : "";
+                const name = row[config.colName] ? String(row[config.colName]).trim() : "";
+
+                if (content && name) {
+                    const safeName = `${content.replace(/[\/\\:*?"<>|]/g, '_')}-${name.replace(/[\/\\:*?"<>|]/g, '_')}`;
+                    const wordDisplayName = `${content}-${name}`;
+
+                    const qrBase64 = await QRCode.toDataURL(content, {
+                        width: 400,
+                        margin: 1,
+                        errorCorrectionLevel: 'M'
+                    });
+
+                    qrDataList.push({
+                        name: safeName,
+                        displayName: wordDisplayName,
+                        image: qrBase64
+                    });
+
+                    imgFolder.file(`${safeName}.png`, qrBase64.split(',')[1], {base64: true});
+                }
+            }
+
+            if (qrDataList.length === 0) {
+                throw new Error("未找到有效数据！请检查列号设置是否正确。");
+            }
+
+            log(`生成完毕！有效二维码: ${qrDataList.length} 个`);
+            log(`正在生成 Word 文档 (列数: ${config.tableCols})...`);
+
+            await generateWordDoc(qrDataList, config.tableCols);
+            
+            log("✅ 全部完成！文件已开始下载。");
+            statusBadge.className = 'badge badge-success';
+            statusBadge.textContent = '完成';
+            BOMUtils.showNotification('success', '二维码生成完成！Word文档已下载');
+
+        } catch (error) {
+            console.error(error);
+            log(`❌ 错误: ${error.message}`);
+            statusBadge.className = 'badge badge-danger';
+            statusBadge.textContent = '错误';
+            BOMUtils.showNotification('error', `发生错误: ${error.message}`);
+        } finally {
+            processBtn.disabled = false;
+            processBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                再次处理
+            `;
+        }
+    });
+
+    // 读取 Excel
+    function readExcel(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    resolve(json);
+                } catch (err) {
+                    reject(err);
+                }
+            };
+            reader.onerror = (err) => reject(err);
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // 生成 Word
+    async function generateWordDoc(items, numCols) {
+        const { Document, Packer, Paragraph, Table, TableRow, TableCell, ImageRun, TextRun, WidthType, AlignmentType, BorderStyle } = docx;
+
+        const pagePixelWidth = 550;
+        const cellPixelWidth = pagePixelWidth / numCols;
+        const imgDisplaySize = Math.floor(cellPixelWidth * 0.9);
+
+        const rows = [];
+        const totalItems = items.length;
+        const totalRows = Math.ceil(totalItems / numCols);
+
+        const noBorder = {
+            top: { style: BorderStyle.NONE, size: 0, color: "auto" },
+            bottom: { style: BorderStyle.NONE, size: 0, color: "auto" },
+            left: { style: BorderStyle.NONE, size: 0, color: "auto" },
+            right: { style: BorderStyle.NONE, size: 0, color: "auto" },
+            insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "auto" },
+            insideVertical: { style: BorderStyle.NONE, size: 0, color: "auto" },
+        };
+
+        for (let r = 0; r < totalRows; r++) {
+            const imgCells = [];
+            const textCells = [];
+
+            for (let c = 0; c < numCols; c++) {
+                const index = r * numCols + c;
+                
+                if (index < totalItems) {
+                    const item = items[index];
+                    
+                    imgCells.push(new TableCell({
+                        children: [
+                            new Paragraph({
+                                alignment: AlignmentType.CENTER,
+                                children: [
+                                    new ImageRun({
+                                        data: dataURLToArrayBuffer(item.image),
+                                        transformation: { width: imgDisplaySize, height: imgDisplaySize },
+                                    }),
+                                ],
+                            }),
+                        ],
+                        borders: noBorder,
+                        verticalAlign: "bottom"
+                    }));
+
+                    textCells.push(new TableCell({
+                        children: [
+                            new Paragraph({
+                                alignment: AlignmentType.CENTER,
+                                spacing: { after: 100 },
+                                children: [
+                                    new TextRun({
+                                        text: item.displayName,
+                                        bold: true,
+                                        size: Math.max(14, 22 - numCols * 2),
+                                    }),
+                                ],
+                            }),
+                        ],
+                        borders: noBorder,
+                        verticalAlign: "top"
+                    }));
+                } else {
+                    imgCells.push(new TableCell({ children: [], borders: noBorder }));
+                    textCells.push(new TableCell({ children: [], borders: noBorder }));
+                }
+            }
+
+            rows.push(new TableRow({ children: imgCells }));
+            rows.push(new TableRow({ children: textCells }));
+            
+            if (r < totalRows - 1) {
+                 const spacerCells = Array(numCols).fill(new TableCell({ 
+                     children: [new Paragraph({text: "", spacing: {after: 0}})], 
+                     borders: noBorder 
+                 }));
+                 rows.push(new TableRow({ children: spacerCells, height: {value: 200, rule: "atLeast"} }));
+            }
+        }
+
+        const table = new Table({
+            rows: rows,
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: noBorder
+        });
+
+        const doc = new Document({
+            sections: [{
+                properties: {
+                    page: { margin: { top: 567, bottom: 567, left: 567, right: 567 } }
+                },
+                children: [
+                    new Paragraph({
+                        text: "二维码汇总表",
+                        heading: docx.HeadingLevel.HEADING_1,
+                        alignment: AlignmentType.CENTER,
+                        spacing: { after: 300 }
+                    }),
+                    table
+                ],
+            }],
+        });
+
+        const blob = await Packer.toBlob(doc);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        saveAs(blob, `二维码汇总_${timestamp}.docx`);
+    }
+</script>
+
+</body>
+</html>
