@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOM 智能比对系统操作指南</title>
+    
+    <!-- 本地样式 -->
+    <link href="assets/css/common.css" rel="stylesheet">
+    
+    <style>
+        /* ========================================
+           文档容器 - Bento Grid 风格
+           ======================================== */
+        .doc-container { 
+            max-width: 900px; 
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ========================================
+           封面区块 - 液态玻璃 + 动画
+           ======================================== */
+        .cover-section {
+            text-align: center;
+            padding: 80px 48px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 50%, var(--secondary-color) 100%);
+            border-radius: var(--radius-2xl);
+            color: white;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-hover), 0 0 0 1px rgba(255,255,255,0.1) inset;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s var(--ease-spring);
+        }
+        
+        .cover-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 70%, rgba(255,255,255,0.1) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        
+        .cover-section::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 50%);
+            animation: shimmer 8s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-3%, -3%) rotate(3deg); }
+        }
+        
+        .cover-section .icon { 
+            width: 56px; 
+            height: 56px; 
+            margin-bottom: 16px; 
+            opacity: 0.95; 
+            fill: currentColor;
+            animation: float 4s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+        }
+        
+        .cover-section h1 { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 16px rgba(0,0,0,0.15);
+            line-height: 1.25;
+        }
+        
+        .cover-section .subtitle { 
+            font-size: 1rem; 
+            opacity: 0.92; 
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+        
+        .cover-info { 
+            margin-top: 0; 
+            padding-top: 0; 
+            border-top: none;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-full);
+            background: rgba(255,255,255,0.1);
+            padding: 12px 28px;
+            display: inline-flex;
+            gap: 32px;
+        }
+        
+        .cover-info p { margin: 0; }
+        
+        /* ========================================
+           目录区块 - Bento Grid + 液态玻璃
+           ======================================== */
+        .toc-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            padding: 40px;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toc-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        .toc-section h2 { 
+            color: var(--primary-color); 
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 28px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toc-section h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 2px;
+        }
+        
+        .toc-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+            transition: all 0.35s var(--ease-spring);
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid transparent;
+            margin-bottom: 8px;
+        }
+        
+        .toc-item:hover { 
+            background: var(--primary-alpha-10);
+            padding-left: 28px;
+            border-color: var(--card-border-strong);
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .toc-number { 
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(184, 149, 107, 0.3);
+        }
+        
+        .toc-text {
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        /* ========================================
+           内容区块 - 液态玻璃卡片
+           ======================================== */
+        .content-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            padding: 40px;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 32px;
+            border: 1px solid var(--card-border);
+            position: relative;
+            transition: all 0.4s var(--ease-spring);
+        }
+        
+        .content-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        .content-section:hover {
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--card-border-strong);
+        }
+        
+        .content-section h2 { 
+            color: var(--text-primary); 
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 28px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .content-section h2::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 2px;
+        }
+        
+        .content-section h3 { 
+            color: var(--text-primary); 
+            margin: 32px 0 20px 0; 
+            padding-left: 0;
+            border-left: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .content-section h3::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-color);
+            border-radius: 50%;
+        }
+        
+        .content-section h4 { 
+            color: var(--text-secondary); 
+            margin: 24px 0 16px 0; 
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        /* ========================================
+           步骤卡片 - 弹簧物理动画
+           ======================================== */
+        .step-card {
+            background: linear-gradient(135deg, var(--bg-light) 0%, rgba(255,254,251,0.8) 100%);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            margin: 24px 0;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.4s var(--ease-spring);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 2px 0 0 2px;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-4px) scale(1.005);
+            box-shadow: var(--shadow-md);
+            border-color: var(--card-border-strong);
+        }
+        
+        .step-header { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 16px;
+        }
+        
+        .step-number {
+            width: 44px; 
+            height: 44px; 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border-radius: var(--radius-md); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-weight: 700; 
+            font-size: 1.2rem; 
+            margin-right: 16px; 
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(184, 149, 107, 0.35);
+            transition: all 0.3s var(--ease-spring);
+        }
+        
+        .step-card:hover .step-number {
+            transform: scale(1.1) rotate(-3deg);
+            box-shadow: 0 6px 16px rgba(184, 149, 107, 0.45);
+        }
+        
+        .step-title { 
+            font-size: 1.15rem; 
+            font-weight: 600; 
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+        
+        /* ========================================
+           提示框 - 液态玻璃效果
+           ======================================== */
+        .tip-box {
+            background: linear-gradient(135deg, rgba(122, 139, 155, 0.08) 0%, rgba(240, 245, 247, 0.6) 100%);
+            border: 1px solid rgba(122, 139, 155, 0.2);
+            border-left: 4px solid var(--info-color);
+            padding: 20px 24px;
+            margin: 24px 0; 
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(12px);
+            position: relative;
+            transition: all 0.35s var(--ease-spring);
+        }
+        
+        .tip-box:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+            border-color: rgba(122, 139, 155, 0.35);
+        }
+        
+        .tip-box::before { 
+            content: "提示"; 
+            display: block; 
+            font-weight: 700; 
+            color: var(--info-color); 
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tip-box::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: var(--info-color);
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E") no-repeat center;
+            mask-size: contain;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0.3;
+        }
+        
+        /* ========================================
+           警告框 - 液态玻璃效果
+           ======================================== */
+        .warning-box {
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.08) 0%, rgba(253, 240, 226, 0.6) 100%);
+            border: 1px solid rgba(212, 165, 116, 0.25);
+            border-left: 4px solid var(--warning-color);
+            padding: 20px 24px;
+            margin: 24px 0; 
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(12px);
+            position: relative;
+            transition: all 0.35s var(--ease-spring);
+        }
+        
+        .warning-box:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+            border-color: rgba(212, 165, 116, 0.4);
+        }
+        
+        .warning-box::before { 
+            content: "重要"; 
+            display: block; 
+            font-weight: 700; 
+            color: var(--accent-dark); 
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .warning-box::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            background: var(--warning-color);
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'/%3E%3C/svg%3E") no-repeat center;
+            mask-size: contain;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0.3;
+        }
+        
+        /* ========================================
+           状态网格
+           ======================================== */
+        .status-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 16px; 
+            margin: 24px 0; 
+        }
+        
+        .status-item { 
+            display: flex; 
+            align-items: flex-start; 
+            padding: 20px; 
+            background: var(--bg-light);
+            border-radius: var(--radius-lg); 
+            border: 1px solid var(--border-light);
+            transition: all 0.35s var(--ease-spring);
+        }
+        
+        .status-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--card-border-strong);
+            background: white;
+        }
+        
+        .status-item svg { 
+            width: 22px; 
+            height: 22px; 
+            margin-right: 14px; 
+            margin-top: 2px; 
+            flex-shrink: 0;
+            transition: transform 0.3s var(--ease-spring);
+        }
+        
+        .status-item:hover svg {
+            transform: scale(1.15);
+        }
+        
+        .status-content h4 { 
+            margin: 0 0 6px 0; 
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .status-content p { 
+            margin: 0; 
+            font-size: 0.85rem; 
+            color: var(--text-muted);
+        }
+        
+        /* ========================================
+           Q&A 项目
+           ======================================== */
+        .qa-item { 
+            margin: 24px 0; 
+            padding: 24px; 
+            background: var(--bg-light);
+            border-radius: var(--radius-xl); 
+            border: 1px solid var(--border-light);
+            transition: all 0.35s var(--ease-spring);
+        }
+        
+        .qa-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--card-border-strong);
+        }
+        
+        .qa-question { 
+            font-weight: 700; 
+            color: var(--primary-color); 
+            font-size: 1.05rem; 
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .qa-question::before {
+            content: 'Q';
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .qa-answer { 
+            padding-left: 34px;
+            color: var(--text-secondary);
+        }
+        
+        /* ========================================
+           流程图 - Bento 风格
+           ======================================== */
+        .flowchart {
+            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
+            border-radius: var(--radius-xl); 
+            padding: 40px; 
+            margin: 24px 0;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+        
+        .flowchart::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(184, 149, 107, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(212, 165, 116, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        
+        .flow-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg); 
+            padding: 16px 32px; 
+            margin: 8px 0; 
+            font-weight: 600; 
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.35s var(--ease-spring);
+            position: relative;
+            z-index: 1;
+            min-width: 200px;
+        }
+        
+        .flow-box:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+        
+        .flow-arrow { 
+            color: var(--primary-color); 
+            font-size: 1.5rem; 
+            margin: 8px 0;
+            opacity: 0.6;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* ========================================
+           页脚
+           ======================================== */
+        .footer-section { 
+            text-align: center; 
+            padding: 48px 40px; 
+            color: var(--text-muted);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--card-border);
+            margin-top: 20px;
+        }
+        
+        .footer-section p {
+            margin: 0;
+        }
+        
+        .footer-section p:last-child {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* ========================================
+           返回按钮
+           ======================================== */
+        .back-btn { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .back-btn svg { 
+            width: 16px; 
+            height: 16px; 
+            fill: currentColor;
+            transition: transform 0.3s var(--ease-spring);
+        }
+        
+        .back-btn:hover svg {
+            transform: translateX(-3px);
+        }
+        
+        /* ========================================
+           返回顶部按钮
+           ======================================== */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s var(--ease-spring);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 999;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+        
+        .back-to-top svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary-color);
+        }
+        
+        /* ========================================
+           响应式优化
+           ======================================== */
+        @media (max-width: 992px) {
+            .status-grid { grid-template-columns: 1fr; }
+            .cover-section { padding: 60px 32px; }
+            .cover-section h1 { font-size: 2rem; }
+            .content-section, .toc-section { padding: 28px; }
+            .cover-info { flex-direction: column; gap: 12px; }
+        }
+        
+        @media (max-width: 768px) {
+            .doc-container { padding: 0 16px; }
+            .cover-section { padding: 48px 24px; border-radius: var(--radius-xl); }
+            .cover-section h1 { font-size: 1.6rem; }
+            .cover-section .icon { width: 64px; height: 64px; }
+            .content-section, .toc-section { padding: 24px; border-radius: var(--radius-xl); }
+            .step-card { padding: 20px; }
+            .flowchart { padding: 28px 20px; }
+            .flow-box { min-width: 160px; padding: 14px 24px; }
+            .qa-answer { padding-left: 0; padding-top: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="doc-container">
+    <!-- 返回按钮 -->
+    <div class="text-center mb-4">
+        <a href="BOM检查工具.html" class="btn btn-outline back-btn">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            返回BOM检查工具
+        </a>
+        <a href="index.html" class="btn btn-outline back-btn" style="margin-left: 10px;">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            返回首页
+        </a>
+    </div>
+
+    <!-- 封面 -->
+    <div class="cover-section">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <h1>BOM 智能比对系统<br>操作指南</h1>
+        <p class="subtitle">硬件 BOM 与接插件 BOM 自动核对工具使用手册</p>
+        
+        <div class="cover-info">
+            <p><strong>文档版本：</strong>v1.0</p>
+            <p><strong>最后更新：</strong>2026年2月25日</p>
+        </div>
+    </div>
+
+    <!-- 目录 -->
+    <div class="toc-section" id="toc">
+        <h2>目 录</h2>
+        
+        <div class="toc-item" onclick="scrollToSection('section1')"><span class="toc-number">一</span><span class="toc-text flex-grow-1">系统概述</span></div>
+        <div class="toc-item" onclick="scrollToSection('section2')"><span class="toc-number">二</span><span class="toc-text flex-grow-1">操作步骤</span></div>
+        <div class="toc-item" onclick="scrollToSection('section3')"><span class="toc-number">三</span><span class="toc-text flex-grow-1">接插件 BOM 填写规范</span></div>
+        <div class="toc-item" onclick="scrollToSection('section4')"><span class="toc-number">四</span><span class="toc-text flex-grow-1">核对结果解读</span></div>
+        <div class="toc-item" onclick="scrollToSection('section5')"><span class="toc-number">五</span><span class="toc-text flex-grow-1">常见问题处理</span></div>
+        <div class="toc-item" onclick="scrollToSection('section6')"><span class="toc-number">六</span><span class="toc-text flex-grow-1">工作流程图</span></div>
+        <div class="toc-item" onclick="scrollToSection('section7')"><span class="toc-number">七</span><span class="toc-text flex-grow-1">注意事项</span></div>
+    </div>
+
+    <!-- 正文 -->
+    <div class="content-section" id="section1">
+        <h2>一、系统概述</h2>
+        
+        <p>BOM 智能比对系统是一款用于自动比对接插件 BOM 与硬件 BOM 一致性的专业工具。系统能够智能识别两个 BOM 文件中的料号信息，自动检测并标记以下四类问题：</p>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr><th style="width:120px;">检测问题</th><th>问题说明</th><th>产生原因</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>缺失料号</strong></td><td>接插件 BOM 中有，但硬件 BOM 中缺失</td><td>硬件 BOM 漏添加物料</td></tr>
+                    <tr><td><strong>多余料号</strong></td><td>接插件 BOM 已废弃（打删除线），但硬件 BOM 中仍存在</td><td>硬件 BOM 未及时删除废弃料号</td></tr>
+                    <tr><td><strong>顺序错误</strong></td><td>同一名称的多个料号在硬件 BOM 中的行号顺序不匹配</td><td>硬件 BOM 中物料主次顺序未同步</td></tr>
+                    <tr><td><strong>数量错误</strong></td><td>接插件用量与硬件位号数量不一致</td><td>用量或位号统计有误</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="content-section" id="section2">
+        <h2>二、操作步骤</h2>
+        
+        <div class="step-card">
+            <div class="step-header"><div class="step-number">1</div><div class="step-title">上传硬件 BOM</div></div>
+            <div class="step-content">
+                <ol>
+                    <li>点击左侧 <strong>"硬件 BOM"</strong> 区域</li>
+                    <li>选择硬件 BOM 文件（支持 <code>.xls</code> / <code>.xlsx</code> 格式）</li>
+                    <li>系统自动识别文件名中的类别关键字（MB / KB / ANTB）并填充到类别输入框</li>
+                </ol>
+                
+                <h4>硬件 BOM 表头规范</h4>
+                <p>系统会自动扫描前 15 行，识别同时包含以下 4 个关键字的行作为表头：</p>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th style="width:100px;">必需列</th><th>说明</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>序号</strong></td><td>行序号，用于替代料继承逻辑</td></tr>
+                            <tr><td><strong>料号</strong></td><td>物料编码，必须以 <code>HQ</code> 开头</td></tr>
+                            <tr><td><strong>物料描述</strong></td><td>物料描述信息</td></tr>
+                            <tr><td><strong>位号</strong></td><td>元件位号，多个位号用逗号、空格或换行分隔</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="tip-box">如果系统未找到匹配的表头，将使用系统下载的默认硬件BOM的设置</div>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header"><div class="step-number">2</div><div class="step-title">输入待核对类别</div></div>
+            <div class="step-content">
+                <p>在 <strong>"待核对类别"</strong> 输入框中填写需要核对的类别：</p>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>类别代码</th><th>对应名称</th></tr></thead>
+                        <tbody>
+                            <tr><td>MB</td><td>主板</td></tr>
+                            <tr><td>KB</td><td>小板</td></tr>
+                            <tr><td>ANTB</td><td>天线小板</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="tip-box">系统会自动识别文件名中的类别，如文件名包含 "MB" 则自动填充 "MB"</div>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header"><div class="step-number">3</div><div class="step-title">上传接插件 BOM</div></div>
+            <div class="step-content">
+                <ol>
+                    <li>点击右侧 <strong>"接插件 BOM"</strong> 区域</li>
+                    <li>选择接插件 BOM 文件（仅支持 <code>.xlsx</code> 格式）</li>
+                    <li>系统会自动检测以下列：</li>
+                </ol>
+                
+                <ul>
+                    <li><strong>料号列</strong>：通过内容匹配查找 HQ 开头的料号所在列</li>
+                    <li><strong>名称列</strong>：通过关键字匹配</li>
+                    <li><strong>用量列</strong>：通过关键字匹配</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header"><div class="step-number">4</div><div class="step-title">开始核对</div></div>
+            <div class="step-content">
+                <p>点击 <strong>"开始交叉核对"</strong> 按钮，系统将自动执行比对并生成结果报告。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section" id="section3">
+        <h2>三、接插件 BOM 填写规范</h2>
+        
+        <h3>3.1 必填列说明</h3>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th style="width:100px;">列名</th><th style="width:60px;">必填</th><th>规范说明</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>类别</strong></td><td style="text-align:center">是</td><td>填写类别代码，如 MB、KB、ANTB 等</td></tr>
+                    <tr><td><strong>物料名称</strong></td><td style="text-align:center">是</td><td>物料的描述名称</td></tr>
+                    <tr><td><strong>料号</strong></td><td style="text-align:center">是</td><td>必须以 HQ 开头，如 <code>HQ1191175B00K</code></td></tr>
+                    <tr><td><strong>用量</strong></td><td style="text-align:center">是</td><td>物料数量，与位号数进行比对</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>3.2 删除线使用规范</h3>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>场景</th><th>操作方式</th><th>系统判断</th></tr></thead>
+                <tbody>
+                    <tr><td>废弃料号且硬件已删除</td><td>对类别/料号/名称任一单元格添加删除线</td><td>显示"已废弃"（正常）</td></tr>
+                    <tr><td>废弃料号但硬件仍存在</td><td>对类别/料号/名称任一单元格添加删除线</td><td>显示"多余料号"（需处理）</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="warning-box">打删除线后，该行仍必须保留正确的类别和料号信息，否则无法参与比对</div>
+    </div>
+
+    <div class="content-section" id="section4">
+        <h2>四、核对结果解读</h2>
+        
+        <h3>4.1 结果列表字段说明</h3>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th style="width:120px;">字段</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>接插件行号</td><td>接插件 BOM 中的 Excel 行号</td></tr>
+                    <tr><td>类别</td><td>该行所属的类别</td></tr>
+                    <tr><td>物料名称</td><td>物料描述名称</td></tr>
+                    <tr><td>料号</td><td>物料编码</td></tr>
+                    <tr><td>硬件行号</td><td>硬件 BOM 中的 Excel 行号</td></tr>
+                    <tr><td>接插件用量</td><td>接插件 BOM 中的用量</td></tr>
+                    <tr><td>硬件用量</td><td>硬件 BOM 中位号的数量</td></tr>
+                    <tr><td>核对结果</td><td>比对状态</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>4.2 核对结果状态说明</h3>
+        
+        <div class="status-grid">
+            <div class="status-item">
+                <svg viewBox="0 0 24 24" fill="#27ae60"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                <div class="status-content"><h4>核对通过</h4><p>接插件与硬件 BOM 完全匹配</p></div>
+            </div>
+            <div class="status-item">
+                <svg viewBox="0 0 24 24" fill="#95a5a6"><path d="M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                <div class="status-content"><h4>已废弃</h4><p>接插件 BOM 打删除线，硬件中不存在</p></div>
+            </div>
+            <div class="status-item">
+                <svg viewBox="0 0 24 24" fill="#e74c3c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <div class="status-content"><h4>料号缺失</h4><p>接插件 BOM 有但硬件 BOM 找不到</p></div>
+            </div>
+            <div class="status-item">
+                <svg viewBox="0 0 24 24" fill="#e67e22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <div class="status-content"><h4>顺序错误</h4><p>物料主次顺序与硬件BOM不匹配</p></div>
+            </div>
+            <div class="status-item">
+                <svg viewBox="0 0 24 24" fill="#9b59b6"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <div class="status-content"><h4>数量不匹配</h4><p>接插件用量与硬件位号数量不一致</p></div>
+            </div>
+            <div class="status-item">
+                <svg viewBox="0 0 24 24" fill="#c0392b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <div class="status-content"><h4>多余料号</h4><p>接插件已废弃但硬件仍存在</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section" id="section5">
+        <h2>五、常见问题处理</h2>
+        
+        <div class="qa-item">
+            <div class="qa-question">硬件 BOM 解析失败或数据不对</div>
+            <div class="qa-answer">
+                <h5>可能原因：</h5>
+                <ul><li>表头不在前 15 行内</li><li>表头缺少"序号"、"料号"、"位号"、"物料描述"中的某个关键字</li></ul>
+                <h5>解决方法：</h5>
+                <ul><li>确保表头包含上述 4 个关键字</li><li>将表头移到前 15 行内</li></ul>
+            </div>
+        </div>
+        
+        <div class="qa-item">
+            <div class="qa-question">接插件 BOM 列检测不准确</div>
+            <div class="qa-answer">
+                <h5>解决方法：</h5>
+                <ul><li>检查接插件 BOM 是否与模板一致</li><li>手动选择料号列、名称列、用量列</li></ul>
+            </div>
+        </div>
+        
+        <div class="qa-item">
+            <div class="qa-question">某些行没有被识别</div>
+            <div class="qa-answer">
+                <h5>可能原因：</h5>
+                <ul><li>料号不以 HQ 开头</li><li>料号为 N/A 或空</li><li>类别不匹配</li></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section" id="section6">
+        <h2>六、工作流程图</h2>
+        
+        <div class="flowchart">
+            <div class="flow-box">准备硬件 BOM</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-box">准备接插件 BOM</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-box">上传两个 BOM 文件</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-box">输入核对类别（如 MB）</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-box">开始交叉核对</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-box">查看结果并处理</div>
+        </div>
+    </div>
+
+    <div class="content-section" id="section7">
+        <h2>七、注意事项</h2>
+        
+        <ol>
+            <li><strong>BOM规范：</strong>建议按照模板进行BOM制作</li>
+            <li><strong>料号规范：</strong>所有料号必须以 <code>HQ</code> 开头，否则会被过滤</li>
+            <li><strong>行号显示：</strong>系统显示的均为 Excel 真实行号（从 1 开始）</li>
+            <li><strong>删除线标记：</strong>废弃料号建议打删除线，以便系统检测"多余料号"</li>
+            <li><strong>替代料处理：</strong>硬件 BOM 中同序号的多行会正确处理位号继承</li>
+        </ol>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="footer-section">
+        <p>BOM 智能比对系统操作指南 · 版本 v1.0</p>
+        <p>© 制作人 刘明星</p>
+    </div>
+</div>
+
+<!-- 返回顶部按钮 -->
+<div class="back-to-top" id="backToTop" onclick="scrollToTop()">
+    <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+</div>
+
+<script>
+// 滚动到指定章节
+function scrollToSection(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// 滚动到顶部
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 显示/隐藏返回顶部按钮
+window.addEventListener('scroll', function() {
+    const backToTop = document.getElementById('backToTop');
+    if (window.pageYOffset > 300) {
+        backToTop.classList.add('visible');
+    } else {
+        backToTop.classList.remove('visible');
+    }
+});
+</script>
+
+</body>
+</html>

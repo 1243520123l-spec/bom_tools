@@ -20,27 +20,69 @@
     <link href="assets/css/common.css" rel="stylesheet">
     
     <style>
-        /* 页面特定样式 */
+        /* ========================================
+           页面特定样式 - Design-Taste-Frontend 优化版
+           ======================================== */
+        
+        /* ========================================
+           1. 拖拽区域 - 增强视觉反馈 + 液态玻璃
+           ======================================== */
         .drop-zone { 
             border: 2px dashed var(--border-dark); 
-            border-radius: var(--radius-md); 
-            padding: 40px 20px; 
+            border-radius: var(--radius-xl); 
+            padding: 48px 24px; 
             text-align: center; 
             cursor: pointer; 
-            transition: all 0.3s ease; 
+            transition: all 0.4s var(--ease-spring); 
             position: relative; 
             background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%); 
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
         
-        .drop-zone:hover, .drop-zone.dragover { 
+        /* 内发光边框效果 */
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s var(--ease-spring);
+        }
+        
+        .drop-zone:hover::before {
+            opacity: 1;
+        }
+        
+        /* 悬停状态 - 弹簧物理动画 */
+        .drop-zone:hover { 
             border-color: var(--primary-color); 
             background: linear-gradient(135deg, var(--primary-soft) 0%, var(--bg-light) 100%);
-            box-shadow: var(--shadow-sm);
-            transform: scale(1.01);
+            box-shadow: var(--shadow-md), 0 0 0 4px var(--primary-alpha-10);
+            transform: translateY(-2px) scale(1.01);
+        }
+        
+        /* 拖拽进入状态 - 更明显的视觉反馈 */
+        .drop-zone.dragover { 
+            border-color: var(--primary-color);
+            border-style: solid;
+            background: linear-gradient(135deg, var(--primary-soft) 0%, var(--bg-light) 100%);
+            box-shadow: var(--shadow-lg), 0 0 0 6px var(--primary-alpha-20);
+            transform: translateY(-4px) scale(1.02);
+        }
+        
+        .drop-zone.dragover::before {
+            opacity: 1;
         }
         
         .drop-zone input { 
@@ -54,76 +96,169 @@
             z-index: 10;
         }
         
+        /* 上传图标 - 增强动画 */
         .drop-zone .icon-upload { 
-            width: 64px;
-            height: 64px;
-            margin-bottom: 15px;
+            width: 72px;
+            height: 72px;
+            margin-bottom: 20px;
             fill: var(--primary-light);
-            transition: all 0.3s ease;
+            transition: all 0.4s var(--ease-spring);
+            filter: drop-shadow(0 4px 6px rgba(184, 149, 107, 0.1));
         }
         
         .drop-zone:hover .icon-upload {
             fill: var(--primary-color);
-            transform: translateY(-3px);
+            transform: translateY(-6px) scale(1.05);
+            filter: drop-shadow(0 8px 12px rgba(184, 149, 107, 0.2));
+        }
+        
+        .drop-zone.dragover .icon-upload {
+            fill: var(--primary-dark);
+            transform: translateY(-8px) scale(1.1);
+            animation: float-upload 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes float-upload {
+            0%, 100% { transform: translateY(-8px) scale(1.1); }
+            50% { transform: translateY(-12px) scale(1.1); }
         }
         
         .upload-text {
             color: var(--text-secondary);
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        .drop-zone:hover .upload-text {
+            color: var(--primary-dark);
         }
         
         .upload-hint {
             color: var(--text-muted);
             font-size: 13px;
+            transition: color 0.3s ease;
         }
         
+        /* 文件信息提示 - 液态玻璃效果 */
         .file-info-custom {
             display: none;
-            margin-top: 15px;
-            padding: 12px 20px;
-            background: linear-gradient(135deg, var(--success-light) 0%, #F0FFF4 100%);
+            margin-top: 20px;
+            padding: 14px 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             color: var(--success-color);
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-lg);
             font-weight: 600;
-            border: 1px solid rgba(72, 187, 120, 0.3);
+            border: 1px solid rgba(122, 155, 118, 0.3);
+            box-shadow: var(--shadow-sm);
+            animation: slideUpFade 0.4s var(--ease-spring);
+        }
+        
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .file-info-custom.active { display: block; }
         
+        /* ========================================
+           2. 日志区域 - 液态玻璃 + 增强滚动条
+           ======================================== */
         .log-container-custom {
             background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--card-shadow);
             margin-bottom: 25px;
             overflow: hidden;
             border: 1px solid var(--card-border);
+            transition: all 0.4s var(--ease-spring);
+        }
+        
+        .log-container-custom:hover {
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--card-border-strong);
+        }
+        
+        .log-container-custom::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
         
         .log-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
+            padding: 18px 24px;
+            background: linear-gradient(135deg, var(--zinc-50) 0%, var(--bg-light) 100%);
             border-bottom: 1px solid var(--border-light);
             font-weight: 700;
             color: var(--text-primary);
+            position: relative;
+        }
+        
+        .log-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--border-color) 50%, transparent 100%);
         }
         
         .log-area-custom {
-            padding: 20px;
-            max-height: 250px;
+            padding: 24px;
+            max-height: 280px;
             overflow-y: auto;
             font-family: var(--font-mono);
             font-size: 13px;
-            line-height: 1.8;
+            line-height: 1.9;
             color: var(--text-secondary);
+            background: rgba(255, 254, 251, 0.5);
+        }
+        
+        /* 自定义滚动条 */
+        .log-area-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .log-area-custom::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 8px 0;
+        }
+        
+        .log-area-custom::-webkit-scrollbar-thumb {
+            background: var(--zinc-300);
+            border-radius: 3px;
+        }
+        
+        .log-area-custom::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-light);
         }
         
         .log-area-custom .log-time {
             color: var(--text-muted);
+            font-weight: 500;
         }
         
         .log-area-custom .log-success {
@@ -140,69 +275,364 @@
             color: var(--info-color);
         }
         
+        /* ========================================
+           3. 进度条 - 弹簧动画 + 流光效果
+           ======================================== */
         .progress-container {
-            margin: 15px 0;
+            margin: 20px 0;
             display: none;
         }
         
         .progress-container.active {
             display: block;
+            animation: slideUpFade 0.4s var(--ease-spring);
         }
         
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 10px;
             background: var(--bg-dark);
-            border-radius: 4px;
+            border-radius: var(--radius-full);
             overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
         }
         
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            border-radius: 4px;
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 50%, var(--primary-color) 100%);
+            background-size: 200% 100%;
+            border-radius: var(--radius-full);
+            transition: width 0.5s var(--ease-spring);
             width: 0%;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(184, 149, 107, 0.4);
+            animation: shimmer-progress 2s linear infinite;
+        }
+        
+        @keyframes shimmer-progress {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* 进度条高光 */
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+            border-radius: var(--radius-full) var(--radius-full) 0 0;
         }
         
         .progress-text {
             text-align: center;
-            margin-top: 8px;
-            font-size: 13px;
+            margin-top: 12px;
+            font-size: 14px;
             color: var(--text-secondary);
             font-weight: 600;
+            letter-spacing: 0.02em;
         }
         
+        /* ========================================
+           4. 统计卡片 - 液态玻璃 + 悬浮效果
+           ======================================== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin: 20px 0;
+            gap: 16px;
+            margin: 24px 0;
         }
         
         .stat-card {
-            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
-            padding: 15px;
-            border-radius: var(--radius-md);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            padding: 20px;
+            border-radius: var(--radius-xl);
             text-align: center;
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s var(--ease-spring);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 内发光边框 */
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        /* 顶部强调色条 */
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            border-radius: 0 0 2px 2px;
+            opacity: 0.6;
+            transition: all 0.4s var(--ease-spring);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--card-border-strong);
+        }
+        
+        .stat-card:hover::after {
+            left: 10%;
+            right: 10%;
+            opacity: 1;
+            height: 4px;
         }
         
         .stat-card .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--primary-color);
+            line-height: 1.2;
+            margin-bottom: 6px;
+            font-family: var(--font-sans);
+            letter-spacing: -0.02em;
+            transition: transform 0.3s var(--ease-spring);
+        }
+        
+        .stat-card:hover .stat-value {
+            transform: scale(1.05);
         }
         
         .stat-card .stat-label {
             font-size: 12px;
             color: var(--text-muted);
-            margin-top: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
+        /* ========================================
+           5. 页面头部 - 增强动画 + 光效
+           ======================================== */
+        .page-header {
+            margin-bottom: 32px;
+            padding: 48px 40px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 50%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-hover), 0 20px 40px -15px rgba(184, 149, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: headerEntrance 0.8s var(--ease-spring);
+        }
+        
+        @keyframes headerEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 动态光效背景 */
+        .page-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(255,255,255,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(255,255,255,0.1) 0%, transparent 40%);
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* 扫描光效 */
+        .page-header::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -50%;
+            width: 200%;
+            height: 300%;
+            background: linear-gradient(
+                45deg,
+                transparent 40%,
+                rgba(255,255,255,0.08) 50%,
+                transparent 60%
+            );
+            animation: header-shimmer 10s ease-in-out infinite;
+        }
+        
+        @keyframes header-shimmer {
+            0%, 100% { transform: translateX(-30%) translateY(-10%) rotate(0deg); }
+            50% { transform: translateX(30%) translateY(10%) rotate(5deg); }
+        }
+        
+        .page-header h1 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            font-family: var(--font-sans);
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .page-header h1 svg {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            animation: icon-float 3s ease-in-out infinite;
+        }
+        
+        @keyframes icon-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .page-header .subtitle {
+            opacity: 0.95;
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        /* 头部按钮组 */
+        .nav-btn-group {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* ========================================
+           6. 设置卡片 - 增强输入框样式
+           ======================================== */
+        .form-control {
+            transition: all 0.3s var(--ease-spring);
+        }
+        
+        .form-control:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(184, 149, 107, 0.15), 0 0 0 3px var(--primary-alpha-10);
+        }
+        
+        /* ========================================
+           7. 处理按钮 - 增强动画
+           ======================================== */
+        #processBtn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s var(--ease-spring);
+        }
+        
+        #processBtn:not(:disabled):hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(184, 149, 107, 0.5);
+        }
+        
+        #processBtn:not(:disabled):active {
+            transform: translateY(-1px) scale(0.98);
+        }
+        
+        #processBtn:disabled {
+            background: var(--zinc-200);
+            color: var(--zinc-500);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        /* 按钮光效 */
+        #processBtn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        #processBtn:not(:disabled):hover::after {
+            left: 100%;
+        }
+        
+        /* ========================================
+           8. 响应式优化
+           ======================================== */
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .stat-card {
+                padding: 16px;
+            }
+            
+            .stat-card .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .drop-zone {
+                padding: 36px 20px;
+            }
+            
+            .drop-zone .icon-upload {
+                width: 56px;
+                height: 56px;
+            }
+            
+            .page-header {
+                padding: 32px 24px;
+            }
+            
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* ========================================
+           9. 微交互 - 状态指示器脉冲
+           ======================================== */
+        .badge-processing {
+            animation: pulse-badge 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-badge {
+            0%, 100% { 
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.4);
+            }
+            50% { 
+                opacity: 0.9;
+                box-shadow: 0 0 0 8px rgba(212, 165, 116, 0);
             }
         }
     </style>
@@ -213,10 +643,10 @@
     <!-- 页面头部 -->
     <header class="page-header">
         <h1>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
             样机SN二维码智能生成工具
         </h1>
-        <p class="subtitle">自动读取Excel内容，批量生成二维码并导出成Word</p>
+        <p class="subtitle" style="text-align: center;">自动读取Excel内容，批量生成二维码并导出成Word</p>
         <div class="nav-btn-group">
             <a href="index.html" class="btn-header">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -229,7 +659,7 @@
     <div class="card card-border-primary">
         <div class="card-header">
             <h3>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H9l5-5 5 5h-3z"/></svg>
                 上传Excel文件
             </h3>
         </div>
@@ -428,6 +858,8 @@
         document.getElementById('statSkipped').textContent = skipped;
         document.getElementById('statTime').textContent = time + 's';
         statsGrid.style.display = 'grid';
+        // 添加入场动画
+        statsGrid.style.animation = 'slideUpFade 0.6s var(--ease-spring)';
     }
 
     // 辅助：Base64 转 ArrayBuffer
@@ -488,7 +920,7 @@
 
         processBtn.disabled = true;
         processBtn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span> 处理中...';
-        statusBadge.className = 'badge badge-warning';
+        statusBadge.className = 'badge badge-warning badge-processing';
         statusBadge.textContent = '处理中';
         progressContainer.classList.add('active');
         

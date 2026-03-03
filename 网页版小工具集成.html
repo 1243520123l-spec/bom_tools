@@ -9,111 +9,292 @@
     <link href="assets/css/common.css" rel="stylesheet">
     
     <style>
+        /* ========================================
+           基础重置 - Design Taste Frontend 优化
+           ======================================== */
         body {
             padding: 0;
             background: var(--bg-color);
+            font-family: var(--font-sans);
+            overflow: hidden;
         }
         
-        /* 顶部导航栏 */
+        /* ========================================
+           顶部导航栏 - 液态玻璃效果
+           ======================================== */
         .navbar {
-            height: 70px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 50%, var(--secondary-color) 100%);
+            height: var(--header-height);
+            background: linear-gradient(
+                135deg, 
+                rgba(184, 149, 107, 0.92) 0%, 
+                rgba(212, 165, 116, 0.88) 50%, 
+                rgba(139, 115, 85, 0.9) 100%
+            );
             display: flex;
             align-items: center;
-            padding: 0 30px;
-            box-shadow: var(--shadow-md);
-            position: relative;
+            padding: 0 32px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 4px 24px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        
+        /* 玻璃折射内边框效果 */
+        .navbar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(
+                180deg, 
+                rgba(255, 255, 255, 0.25) 0%, 
+                transparent 50%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        /* 微妙的光晕效果 */
+        .navbar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 20%,
+                rgba(255, 255, 255, 0.4) 80%,
+                transparent 100%
+            );
+            pointer-events: none;
         }
 
+        /* ========================================
+           品牌 Logo
+           ======================================== */
         .nav-brand {
             color: white;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 700;
-            margin-right: 40px;
+            margin-right: 48px;
             display: flex;
             align-items: center;
             gap: 12px;
             text-decoration: none;
+            letter-spacing: -0.02em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s var(--ease-spring);
+            position: relative;
         }
         
-        .nav-brand:hover { color: white; text-decoration: none; }
+        .nav-brand:hover { 
+            color: white; 
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+        
+        .nav-brand svg { 
+            width: 26px; 
+            height: 26px; 
+            fill: currentColor;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        }
 
+        /* ========================================
+           导航菜单 - 药丸按钮组
+           ======================================== */
         .nav-menu {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex: 1;
         }
 
         .nav-btn {
-            padding: 10px 24px;
-            background: rgba(255,255,255,0.15);
-            color: rgba(255,255,255,0.95);
-            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 22px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             cursor: pointer;
-            border-radius: 25px;
-            transition: all 0.3s ease;
+            border-radius: var(--radius-full);
+            transition: all 0.4s var(--ease-spring);
             font-size: 14px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-family: var(--font-cn), var(--font-en), sans-serif;
-            backdrop-filter: blur(4px);
+            font-family: var(--font-sans);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+        
+        /* 按钮内发光效果 */
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg, 
+                rgba(255, 255, 255, 0.15) 0%, 
+                transparent 100%
+            );
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .nav-btn:hover {
-            background: rgba(255,255,255,0.25);
-            border-color: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.35);
             color: white;
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-btn:hover::before {
+            opacity: 1;
         }
 
+        /* 激活状态 - 液态玻璃增强 */
         .nav-btn.active {
-            background: rgba(255,255,255,0.35);
-            border-color: rgba(255,255,255,0.8);
+            background: rgba(255, 255, 255, 0.28);
+            border-color: rgba(255, 255, 255, 0.6);
             color: white;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
         }
         
-        .nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .nav-btn.active::before {
+            opacity: 1;
+        }
         
+        /* 激活指示器 - 底部光条 */
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+        
+        .nav-btn svg { 
+            width: 18px; 
+            height: 18px; 
+            fill: currentColor;
+            transition: transform 0.3s var(--ease-spring);
+        }
+        
+        .nav-btn:hover svg {
+            transform: scale(1.1);
+        }
+        
+        .nav-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        /* ========================================
+           右侧操作按钮组
+           ======================================== */
         .nav-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            align-items: center;
         }
         
         .nav-action-btn {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s var(--ease-spring);
             text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+        
+        /* 内发光效果 */
+        .nav-action-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                135deg, 
+                rgba(255, 255, 255, 0.2) 0%, 
+                transparent 60%
+            );
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .nav-action-btn:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.4);
             color: white;
-            transform: scale(1.1);
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
         
-        .nav-action-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .nav-action-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-action-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        .nav-action-btn svg { 
+            width: 20px; 
+            height: 20px; 
+            fill: currentColor;
+            transition: transform 0.3s var(--ease-spring);
+        }
+        
+        .nav-action-btn:hover svg {
+            transform: scale(1.15);
+        }
 
-        /* 容器样式 */
+        /* ========================================
+           主内容区域 - Bento Grid 风格容器
+           ======================================== */
         #content-container {
             width: 100%;
-            height: calc(100vh - 70px);
+            height: calc(100dvh - var(--header-height));
             background: var(--bg-color);
             overflow: hidden;
             position: relative;
+            margin-top: var(--header-height);
+            padding: 24px;
         }
 
         iframe {
@@ -122,11 +303,30 @@
             border: none;
             display: none;
             background: var(--bg-color);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--card-shadow);
+            transition: all 0.5s var(--ease-spring);
         }
 
-        iframe.active { display: block; }
+        iframe.active { 
+            display: block;
+            animation: iframeFadeIn 0.5s var(--ease-spring);
+        }
+        
+        @keyframes iframeFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.99);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
 
-        /* 加载动画 */
+        /* ========================================
+           加载动画 - 微交互设计
+           ======================================== */
         .iframe-loading {
             position: absolute;
             top: 50%;
@@ -134,60 +334,188 @@
             transform: translate(-50%, -50%);
             text-align: center;
             color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
         }
         
         .iframe-loading .spinner {
-            width: 40px;
-            height: 40px;
-            border-width: 3px;
-            margin: 0 auto 15px;
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--zinc-200);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
         }
         
+        .iframe-loading p {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        
+        /* 加载文字的脉冲效果 */
+        .iframe-loading p::after {
+            content: '';
+            animation: loadingDots 1.5s infinite;
+        }
+        
+        @keyframes loadingDots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        /* ========================================
+           分隔线装饰
+           ======================================== */
+        .nav-divider {
+            width: 1px;
+            height: 28px;
+            background: linear-gradient(
+                180deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                transparent 100%
+            );
+            margin: 0 16px;
+        }
+        
+        /* ========================================
+           标签 - 小徽章
+           ======================================== */
+        .nav-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            margin-left: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            backdrop-filter: blur(4px);
+        }
+
+        /* ========================================
+           响应式优化
+           ======================================== */
         @media (max-width: 992px) {
-            .navbar { padding: 0 15px; }
-            .nav-brand { font-size: 1.1rem; margin-right: 15px; }
-            .nav-brand span { display: none; }
-            .nav-menu { gap: 5px; }
-            .nav-btn { padding: 8px 15px; font-size: 12px; }
-            .nav-btn span { display: none; }
+            .navbar { 
+                padding: 0 20px; 
+            }
+            
+            .nav-brand { 
+                font-size: 1.1rem; 
+                margin-right: 20px; 
+            }
+            
+            .nav-brand span { 
+                display: none; 
+            }
+            
+            .nav-menu { 
+                gap: 6px; 
+            }
+            
+            .nav-btn { 
+                padding: 8px 16px; 
+                font-size: 13px; 
+            }
+            
+            .nav-btn span { 
+                display: none; 
+            }
+            
+            .nav-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+            
+            #content-container {
+                padding: 16px;
+            }
+            
+            .nav-divider {
+                margin: 0 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0 16px;
+            }
+            
+            .nav-brand {
+                margin-right: 12px;
+            }
+            
+            .nav-btn {
+                padding: 8px 12px;
+            }
+            
+            .nav-action-btn {
+                width: 40px;
+                height: 40px;
+            }
+            
+            #content-container {
+                padding: 12px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- 顶部导航栏 -->
+    <!-- 顶部导航栏 - 液态玻璃效果 -->
     <nav class="navbar">
         <a href="index.html" class="nav-brand" target="_blank">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+            </svg>
             <span>BOM 综合管理平台</span>
         </a>
         
         <div class="nav-menu">
             <button class="nav-btn active" onclick="showPage('query', this)">
-                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
                 <span>位号查询</span>
             </button>
             <button class="nav-btn" onclick="showPage('check', this)">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
                 <span>BOM交叉核对</span>
             </button>
             <button class="nav-btn" onclick="showPage('print', this)">
-                <svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4z"/>
+                </svg>
                 <span>样机SN打印</span>
             </button>
         </div>
         
+        <div class="nav-divider"></div>
+        
         <div class="nav-actions">
             <a href="BOM智能比对系统操作指南.html" target="_blank" class="nav-action-btn" title="操作指南">
-                <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                </svg>
             </a>
             <a href="index.html" target="_blank" class="nav-action-btn" title="首页">
-                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
             </a>
         </div>
     </nav>
 
-    <!-- iframe 容器 -->
+    <!-- iframe 容器 - Bento Grid 风格 -->
     <div id="content-container">
         <iframe id="frame-query" src="位号查询工具.html" class="active"></iframe>
         <iframe id="frame-check" src="BOM检查工具.html"></iframe>
@@ -195,19 +523,96 @@
     </div>
 
     <script>
+        /**
+         * 页面切换功能
+         * 使用弹簧物理动画效果
+         */
         function showPage(pageId, btn) {
+            // 更新按钮状态
             const buttons = document.querySelectorAll('.nav-btn');
             buttons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
+            // 切换 iframe 显示
             const iframes = document.querySelectorAll('iframe');
-            iframes.forEach(f => f.classList.remove('active'));
+            iframes.forEach(f => {
+                f.classList.remove('active');
+                // 添加退出动画效果
+                f.style.opacity = '0';
+                f.style.transform = 'translateY(-10px) scale(0.99)';
+            });
 
-            const targetFrame = document.getElementById('frame-' + pageId);
-            if (targetFrame) {
-                targetFrame.classList.add('active');
-            }
+            // 延迟显示目标 iframe，创造过渡效果
+            setTimeout(() => {
+                const targetFrame = document.getElementById('frame-' + pageId);
+                if (targetFrame) {
+                    targetFrame.classList.add('active');
+                    targetFrame.style.opacity = '';
+                    targetFrame.style.transform = '';
+                }
+            }, 50);
+            
+            // 添加点击反馈 - 涟漪效果
+            createRipple(btn);
         }
+        
+        /**
+         * 创建涟漪点击效果
+         */
+        function createRipple(element) {
+            const ripple = document.createElement('span');
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                transform: scale(0);
+                animation: rippleEffect 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (rect.width / 2 - size / 2) + 'px';
+            ripple.style.top = (rect.height / 2 - size / 2) + 'px';
+            
+            element.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        }
+        
+        // 添加涟漪动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes rippleEffect {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        /**
+         * 键盘快捷键支持
+         */
+        document.addEventListener('keydown', (e) => {
+            // Alt + 1/2/3 切换页面
+            if (e.altKey) {
+                const buttons = document.querySelectorAll('.nav-btn');
+                switch(e.key) {
+                    case '1':
+                        buttons[0].click();
+                        break;
+                    case '2':
+                        buttons[1].click();
+                        break;
+                    case '3':
+                        buttons[2].click();
+                        break;
+                }
+            }
+        });
     </script>
 
 </body>

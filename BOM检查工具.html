@@ -41,10 +41,11 @@
             margin-bottom: 20px;
             font-weight: 600;
             color: var(--text-primary);
-            background: var(--bg-light);
+            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
             padding: 15px;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
         }
         
         /* 表格特定样式 */
@@ -55,7 +56,7 @@
         }
         
         .c-pn {
-            font-family: var(--font-en), var(--font-cn), serif;
+            font-family: var(--font-mono);
             font-weight: 600;
             color: var(--text-secondary);
         }
@@ -73,14 +74,23 @@
         
         /* 徽章样式 - 浮起效果 */
         .result-badge {
-            display: inline-block;
-            padding: 6px 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s var(--ease-spring);
+        }
+        
+        .result-badge:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
         }
         
         /* 料号缺失 - 柔和红色 */
@@ -134,18 +144,103 @@
             border: 2px solid var(--border-light);
             border-radius: var(--radius-md);
             text-align: center;
-            font-family: var(--font-cn), var(--font-en), serif;
+            font-family: var(--font-sans);
             font-size: 14px;
             font-weight: 600;
             background: white;
-            transition: all 0.3s ease;
+            transition: all 0.3s var(--ease-spring);
             color: var(--text-primary);
         }
         
         input[type="text"]:focus, select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(91, 123, 140, 0.15);
+            box-shadow: 0 0 0 4px var(--primary-alpha-10);
+        }
+        
+        /* 图标样式 */
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-md { width: 20px; height: 20px; }
+        .icon-lg { width: 24px; height: 24px; }
+        
+        .icon svg {
+            width: 100%;
+            height: 100%;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+        
+        .header .icon svg {
+            stroke: currentColor;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+        }
+        
+        .panel h3 .icon svg {
+            stroke: currentColor;
+        }
+        
+        .file-upload-wrapper .icon {
+            margin-bottom: 6px;
+            opacity: 0.7;
+            transition: all 0.3s var(--ease-spring);
+        }
+        
+        .file-upload-wrapper:hover .icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .file-upload-wrapper .icon svg {
+            stroke: currentColor;
+        }
+        
+        /* 按钮中的图标 */
+        .btn .icon svg {
+            stroke: currentColor;
+            stroke-width: 2.5;
+        }
+        
+        .btn-header .icon svg {
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+        
+        /* 增强表格悬停效果 */
+        .data-table tbody tr {
+            transition: all 0.2s var(--ease-spring);
+        }
+        
+        .data-table tbody tr:hover {
+            background: var(--primary-alpha-10);
+            transform: scale(1.002);
+        }
+        
+        /* 液态玻璃效果增强 */
+        .panel, .result-area {
+            position: relative;
+        }
+        
+        .panel::before, .result-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -154,16 +249,63 @@
 <div class="container">
     <div class="header">
         <h1>
-            <span>📋</span> BOM 智能比对系统
-            <a href="BOM智能比对系统操作指南.html" target="_blank" class="btn-header">📖 操作指南</a>
+            <span class="icon icon-lg">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor"/>
+                    <path d="M7 8H17" stroke="currentColor"/>
+                    <path d="M7 12H17" stroke="currentColor"/>
+                    <path d="M7 16H13" stroke="currentColor"/>
+                </svg>
+            </span>
+            BOM 智能比对系统
         </h1>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;">
+            <a href="index.html" class="btn-header">
+                <span class="icon icon-sm">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor"/>
+                        <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor"/>
+                    </svg>
+                </span>
+                返回首页
+            </a>
+            <a href="BOM智能比对系统操作指南.html" target="_blank" class="btn-header">
+                <span class="icon icon-sm">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor"/>
+                        <path d="M6.5 2H20V22H6.5A2.5 2.5 0 0 1 4 19.5V4.5A2.5 2.5 0 0 1 6.5 2Z" stroke="currentColor"/>
+                        <path d="M8 7H16" stroke="currentColor"/>
+                        <path d="M8 11H16" stroke="currentColor"/>
+                    </svg>
+                </span>
+                操作指南
+            </a>
+        </div>
     </div>
 
     <div class="main-grid">
         <div class="panel panel-primary">
-            <h3>📂 硬件BOM <span id="hwName" style="font-size:12px; color:var(--text-muted); font-weight:normal;"></span></h3>
+            <h3>
+                <span class="icon icon-md">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9" stroke="currentColor"/>
+                        <path d="M13 2V9H20" stroke="currentColor"/>
+                        <path d="M8 12H16" stroke="currentColor"/>
+                        <path d="M8 16H16" stroke="currentColor"/>
+                    </svg>
+                </span>
+                硬件BOM <span id="hwName" style="font-size:12px; color:var(--text-muted); font-weight:normal;"></span>
+            </h3>
             <label class="file-upload-wrapper" id="hwLabel">
-                <span>📁 点击上传硬件 BOM (.xls/.xlsx)</span>
+                <span class="icon icon-lg">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 19V8.35C22 8.014 21.938 7.681 21.816 7.366C21.694 7.052 21.514 6.762 21.286 6.512L17.714 2.512C17.486 2.262 17.218 2.066 16.924 1.935C16.63 1.804 16.316 1.741 16 1.75H6C5.204 1.75 4.441 2.066 3.879 2.629C3.316 3.191 3 3.954 3 4.75V19C3 19.796 3.316 20.559 3.879 21.121C4.441 21.684 5.204 22 6 22H19C19.796 22 20.559 21.684 21.121 21.121C21.684 20.559 22 19.796 22 19Z" stroke="currentColor"/>
+                        <path d="M16 2V6C16 6.531 16.211 7.04 16.586 7.414C16.96 7.789 17.469 8 18 8H22" stroke="currentColor"/>
+                        <path d="M12 12V18" stroke="currentColor"/>
+                        <path d="M9 15H15" stroke="currentColor"/>
+                    </svg>
+                </span>
+                <span>点击上传硬件 BOM (.xls/.xlsx)</span>
                 <input type="file" id="fileHardware" accept=".xls,.xlsx">
             </label>
             <div class="form-group">
@@ -173,9 +315,24 @@
         </div>
 
         <div class="panel panel-secondary">
-            <h3>🔌 接插件BOM <span id="connName" style="font-size:12px; color:var(--text-muted); font-weight:normal;"></span></h3>
+            <h3>
+                <span class="icon icon-md">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19" stroke="currentColor"/>
+                        <path d="M12 5V19" stroke="currentColor"/>
+                        <circle cx="12" cy="12" r="9" stroke="currentColor"/>
+                        <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+                    </svg>
+                </span>
+                接插件BOM <span id="connName" style="font-size:12px; color:var(--text-muted); font-weight:normal;"></span>
+            </h3>
             <label class="file-upload-wrapper" id="connLabel">
-                <span>⚡ 点击上传接插件 BOM (.xlsx)</span>
+                <span class="icon icon-lg">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor"/>
+                    </svg>
+                </span>
+                <span>点击上传接插件 BOM (.xlsx)</span>
                 <input type="file" id="fileConnector" accept=".xlsx">
             </label>
             <div class="form-group" style="display:grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap:10px;">
@@ -199,7 +356,15 @@
         </div>
     </div>
 
-    <button id="btnCheck" class="btn btn-primary btn-lg btn-block" disabled>正在加载组件...</button>
+    <button id="btnCheck" class="btn btn-primary btn-lg btn-block" disabled>
+        <span class="icon icon-sm">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor"/>
+                <path d="M12 6V12L16 14" stroke="currentColor"/>
+            </svg>
+        </span>
+        正在加载组件...
+    </button>
     <div id="loadingStatus"></div>
 
     <div class="result-area" id="resultArea" style="display:none;">
@@ -248,7 +413,15 @@
             if (!xlsxLoaded) missing.push('XLSX');
             if (!excelJsLoaded) missing.push('ExcelJS');
             document.getElementById('loadingStatus').innerHTML = 
-                `<span style="color:var(--accent-color);">⏳ 正在加载组件: ${missing.join(', ')}...</span>`;
+                `<span style="color:var(--accent-color);">
+                    <span class="icon" style="display:inline-flex;vertical-align:middle;width:16px;height:16px;margin-right:4px;">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6V12L16 14"/>
+                        </svg>
+                    </span>
+                    正在加载组件: ${missing.join(', ')}...
+                </span>`;
             setTimeout(checkLibrariesLoaded, 500);
         }
     }
@@ -557,9 +730,9 @@
         document.getElementById('colConnectorPn').value = pnCol;
         document.getElementById('colConnectorName').value = nameCol;
         document.getElementById('colConnectorQty').value = qtyCol;
-        document.getElementById('pnAutoTip').innerText = foundPn ? "✔ 自动" : "";
-        document.getElementById('nameAutoTip').innerText = foundName ? "✔ 自动" : "";
-        document.getElementById('qtyAutoTip').innerText = foundQty ? "✔ 自动" : "";
+        document.getElementById('pnAutoTip').innerText = foundPn ? "已识别" : "";
+        document.getElementById('nameAutoTip').innerText = foundName ? "已识别" : "";
+        document.getElementById('qtyAutoTip').innerText = foundQty ? "已识别" : "";
         
         console.log(`接插件列检测: 料号列=${getColName(pnCol)}(${foundPn ? '自动' : '默认'}), 名称列=${getColName(nameCol)}(${foundName ? '自动' : '默认'}), 用量列=${getColName(qtyCol)}(${foundQty ? '自动' : '默认'})`);
     }
@@ -579,21 +752,59 @@
         
         if (!xlsxLoaded || !excelJsLoaded) {
             b.disabled = true;
-            b.innerText = "正在加载组件...";
+            b.innerHTML = `
+                <span class="icon icon-sm">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor"/>
+                        <path d="M12 6V12L16 14" stroke="currentColor"/>
+                    </svg>
+                </span>
+                正在加载组件...`;
             return;
         }
         
         if (hwPnMap.size > 0 && connWb) {
             b.disabled = false;
-            b.innerText = "🚀 开始交叉核对";
+            b.innerHTML = `
+                <span class="icon icon-sm">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor"/>
+                        <path d="M22 4L12 14.01L9 11.01" stroke="currentColor"/>
+                    </svg>
+                </span>
+                开始交叉核对`;
         } else {
             b.disabled = true;
             if (hwPnMap.size === 0 && !connWb) {
-                b.innerText = "等待文件就绪...";
+                b.innerHTML = `
+                    <span class="icon icon-sm">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor"/>
+                            <path d="M22 6L12 13L2 6" stroke="currentColor"/>
+                        </svg>
+                    </span>
+                    等待文件就绪...`;
             } else if (hwPnMap.size === 0) {
-                b.innerText = "等待硬件BOM...";
+                b.innerHTML = `
+                    <span class="icon icon-sm">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"/>
+                            <path d="M3 9H21" stroke="currentColor"/>
+                            <path d="M9 21V9" stroke="currentColor"/>
+                        </svg>
+                    </span>
+                    等待硬件BOM...`;
             } else {
-                b.innerText = "等待接插件BOM...";
+                b.innerHTML = `
+                    <span class="icon icon-sm">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19" stroke="currentColor"/>
+                            <path d="M12 5V19" stroke="currentColor"/>
+                            <circle cx="12" cy="12" r="9" stroke="currentColor"/>
+                            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+                        </svg>
+                    </span>
+                    等待接插件BOM...`;
             }
         }
     }
