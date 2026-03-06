@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOM位号查询工具</title>
     
-    <!-- 国内CDN加速 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- 性能优化：DNS 预解析和预连接 -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    
+    <!-- 性能优化：异步加载非关键脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
     
     <!-- 通用样式 -->
+    <link rel="preload" href="assets/css/common.css" as="style">
     <link href="assets/css/common.css" rel="stylesheet">
     
     <style>
@@ -148,19 +153,23 @@
             transform: rotate(90deg);
         }
         
-        /* 结果卡片动画 */
+        /* 性能优化：结果卡片动画 - 使用 GPU 加速 */
         #resultCard {
             animation: expandCard 0.5s var(--ease-spring);
+            /* 性能优化：启用 GPU 加速 */
+            transform: translateZ(0);
+            will-change: transform, opacity;
         }
         
+        /* 性能优化：使用 translate3d 启用 GPU 加速 */
         @keyframes expandCard {
             from {
                 opacity: 0;
-                transform: scale(0.98) translateY(10px);
+                transform: scale(0.98) translate3d(0, 10px, 0);
             }
             to {
                 opacity: 1;
-                transform: scale(1) translateY(0);
+                transform: scale(1) translate3d(0, 0, 0);
             }
         }
         
@@ -248,17 +257,17 @@
             font-weight: 500;
         }
         
-        /* 表格行悬停效果 */
+        /* 性能优化：表格行 - 减少重绘 */
         .data-table tbody tr {
-            transition: all 0.2s var(--ease-smooth);
+            transition: background-color 0.15s ease;
+            /* 性能优化：限制渲染范围 */
+            contain: layout style;
         }
         
         .data-table tbody tr:hover {
             background: var(--primary-alpha-10);
-            transform: scale(1.005);
+            /* 性能优化：移除 transform 减少重绘 */
             box-shadow: var(--shadow-xs);
-            position: relative;
-            z-index: 1;
         }
         
         /* 文件结构信息 */

@@ -129,6 +129,8 @@ html {
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    /* 性能优化：防止滚动链 */
+    overscroll-behavior: auto;
 }
 
 body {
@@ -140,12 +142,17 @@ body {
     line-height: 1.6;
     padding: 30px;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* 性能优化：硬件加速合成 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 /* 代码字体 */
 .pn-code, .code-text, code {
     font-family: var(--font-mono);
     font-feature-settings: "zero", "ss01";
+    /* 性能优化：字体显示策略 */
+    font-display: swap;
 }
 
 code {
@@ -195,19 +202,31 @@ code {
     grid-template-columns: repeat(2, 1fr);
 }
 
+/* 性能优化：屏幕外内容延迟渲染 */
+@media (min-width: 768px) {
+    .bento-item:nth-child(n+4) {
+        content-visibility: auto;
+        contain-intrinsic-size: 0 300px;
+    }
+}
+
 .bento-item {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
     padding: 24px;
     box-shadow: var(--card-shadow);
-    transition: all 0.4s var(--ease-spring);
+    transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring);
+    /* 性能优化：限制渲染范围 */
+    contain: layout style paint;
 }
 
 .bento-item:hover {
     transform: translateY(-4px);
     box-shadow: var(--card-shadow-hover);
     border-color: var(--card-border-strong);
+    /* 性能优化：悬停时启用 GPU 加速 */
+    will-change: transform;
 }
 
 .bento-item-large {
@@ -336,11 +355,14 @@ code {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s var(--ease-spring);
+    transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-spring), background-color 0.3s var(--ease-spring);
     text-decoration: none;
     white-space: nowrap;
     position: relative;
     overflow: hidden;
+    /* 性能优化：GPU 加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 .btn::before {
@@ -360,6 +382,8 @@ code {
 .btn-primary:hover {
     transform: translateY(-2px) scale(1.02);
     box-shadow: 0 8px 24px rgba(184, 149, 107, 0.5), var(--shadow-inset);
+    /* 性能优化：悬停时启用 GPU 加速 */
+    will-change: transform;
 }
 
 .btn-primary:active {
@@ -481,9 +505,11 @@ code {
     box-shadow: var(--card-shadow);
     border: 1px solid var(--card-border);
     margin-bottom: 24px;
-    transition: all 0.4s var(--ease-spring);
+    transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring);
     overflow: hidden;
     position: relative;
+    /* 性能优化：限制渲染范围，减少重绘 */
+    contain: layout style;
 }
 
 .card::before {
@@ -713,12 +739,33 @@ select.form-control, select {
 /* ========================================
    10. 表格样式
    ======================================== */
+/* 性能优化：表格容器优化滚动性能 */
 .table-container {
     overflow-x: auto;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
     background: white;
+    /* 性能优化：启用硬件加速滚动 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    /* 性能优化：大数据表格优化 */
+    contain: layout;
+}
+
+/* 性能优化：大数据表格行优化 */
+.data-table tbody tr {
+    transition: background-color 0.15s ease;
+    /* 性能优化：减少重绘 */
+    contain: layout style;
+}
+
+/* 性能优化：超出视口的表格内容延迟渲染 */
+@media (min-width: 768px) {
+    .data-table tbody tr:nth-child(n+50) {
+        content-visibility: auto;
+        contain-intrinsic-size: 0 50px;
+    }
 }
 
 .data-table {
@@ -755,9 +802,7 @@ select.form-control, select {
     border-radius: 0 var(--radius-lg) 0 0;
 }
 
-.data-table tbody tr {
-    transition: background 0.15s ease;
-}
+/* 已移至 .table-container 规则中 */
 
 .data-table tbody tr:hover {
     background: var(--primary-alpha-10);
@@ -1236,4 +1281,54 @@ body::after {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--zinc-400);
+}
+
+/* ========================================
+   21. 性能优化辅助类
+   ======================================== */
+
+/* GPU 加速 */
+.gpu-accelerated {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* 延迟渲染 - 用于大数据列表 */
+.lazy-render {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 100px;
+}
+
+/* 滚动性能优化 */
+.scroll-optimized {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+}
+
+/* 动画性能优化 - 仅使用 transform 和 opacity */
+.animate-optimized {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    will-change: transform, opacity;
+}
+
+/* 减少动画偏好支持 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .shimmer,
+    .float,
+    .pulse,
+    .spinner {
+        animation: none !important;
+    }
 }

@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOM 智能比对系统</title>
     
-    <!-- 国内CDN加速加载 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+    <!-- 性能优化：DNS 预解析和预连接 -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    
+    <!-- 性能优化：异步加载非关键脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer></script>
     
     <!-- 通用样式 -->
+    <link rel="preload" href="assets/css/common.css" as="style">
     <link href="assets/css/common.css" rel="stylesheet">
     
     <style>
@@ -214,14 +219,44 @@
             stroke-width: 2;
         }
         
-        /* 增强表格悬停效果 */
+        /* 性能优化：表格行优化 - 减少重绘 */
         .data-table tbody tr {
-            transition: all 0.2s var(--ease-spring);
+            transition: background-color 0.15s ease;
+            /* 性能优化：限制渲染范围 */
+            contain: layout style;
+        }
+        
+        /* 性能优化：大数据表格虚拟滚动支持 */
+        .data-table tbody {
+            display: block;
+            max-height: 600px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+        }
+        
+        .data-table thead, .data-table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
         }
         
         .data-table tbody tr:hover {
             background: var(--primary-alpha-10);
-            transform: scale(1.002);
+        }
+        
+        /* 性能优化：表格行分批渲染占位 */
+        .table-row-placeholder {
+            height: 50px;
+            background: linear-gradient(90deg, var(--bg-light) 25%, var(--zinc-100) 50%, var(--bg-light) 75%);
+            background-size: 200% 100%;
+            animation: loading-pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes loading-pulse {
+            0%, 100% { background-position: 200% 0; }
+            50% { background-position: -200% 0; }
         }
         
         /* 液态玻璃效果增强 */
@@ -989,80 +1024,138 @@
         }
     }
 
+    // 性能优化：全局表格数据存储，用于虚拟滚动
+    let tableDataCache = [];
+    let tableStatsCache = {};
+    const BATCH_SIZE = 50; // 每批渲染行数
+    const VIRTUAL_SCROLL_THRESHOLD = 100; // 超过此数量启用虚拟滚动
+    
+    // 性能优化：创建表格行 HTML 字符串
+    function createTableRowHTML(item) {
+        let resultBadge = '';
+        let rowClass = '';
+        
+        switch (item.st) {
+            case 'ignored':
+                rowClass = 'row-ignored';
+                resultBadge = '<span class="result-badge badge-ignored">已废弃</span>';
+                break;
+            case 'extra':
+                rowClass = 'row-extra';
+                resultBadge = `<span class="result-badge badge-extra" title="接插件已废弃但硬件BOM中仍存在">多余料号</span>`;
+                break;
+            case 'missing':
+                rowClass = 'row-missing';
+                resultBadge = '<span class="result-badge badge-missing">料号缺失</span>';
+                break;
+            case 'seq':
+                rowClass = 'row-seq';
+                const tip = item.expectedRow ? `(应在第${item.expectedRow}行)` : '';
+                resultBadge = `<span class="result-badge badge-seq" title="${tip}">顺序错误</span>`;
+                break;
+            case 'qty':
+                rowClass = 'row-qty';
+                resultBadge = `<span class="result-badge badge-qty" title="接插件用量: ${item.connQty}, 硬件位号数: ${item.hwQty}">数量不匹配(${item.connQty}/${item.hwQty})</span>`;
+                break;
+            case 'ok':
+                resultBadge = '<span class="result-badge badge-ok">核对通过</span>';
+                break;
+            default:
+                resultBadge = '<span class="result-badge" style="background:#ccc;color:#666;">待检查</span>';
+        }
+
+        let hwRowDisplay = item.hwRow || '-';
+        if (item.hwRows && item.hwRows.length > 1) {
+            hwRowDisplay = `${item.hwRows[0].rowNum || item.hwRows[0]} <small style="color:var(--text-muted)">(+${item.hwRows.length - 1})</small>`;
+        }
+
+        return `<tr class="${rowClass}">
+            <td>${item.id}</td>
+            <td>${item.cat}</td>
+            <td class="c-name">${item.name}</td>
+            <td class="c-pn">${item.pn}</td>
+            <td>${hwRowDisplay}</td>
+            <td>${item.connQty || '-'}</td>
+            <td>${item.hwQty || '-'}</td>
+            <td>${resultBadge}</td>
+        </tr>`;
+    }
+    
+    // 性能优化：统计结果计算
+    function calculateStats(data) {
+        let missingCount = 0, seqCount = 0, qtyCount = 0, ignoredCount = 0, extraCount = 0, okCount = 0;
+        
+        data.forEach(item => {
+            switch (item.st) {
+                case 'ignored': ignoredCount++; break;
+                case 'extra': extraCount++; break;
+                case 'missing': missingCount++; break;
+                case 'seq': seqCount++; break;
+                case 'qty': qtyCount++; break;
+                case 'ok': okCount++; break;
+            }
+        });
+        
+        return { missingCount, seqCount, qtyCount, ignoredCount, extraCount, okCount };
+    }
+    
+    // 性能优化：分批渲染表格
+    function renderTableBatched(data, startIndex = 0) {
+        const tbody = document.getElementById('resultBody');
+        const endIndex = Math.min(startIndex + BATCH_SIZE, data.length);
+        
+        // 使用 DocumentFragment 批量插入
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement('div');
+        
+        for (let i = startIndex; i < endIndex; i++) {
+            tempDiv.innerHTML = createTableRowHTML(data[i]);
+            fragment.appendChild(tempDiv.firstElementChild);
+        }
+        
+        tbody.appendChild(fragment);
+        
+        // 如果还有更多数据，使用 requestAnimationFrame 继续渲染
+        if (endIndex < data.length) {
+            requestAnimationFrame(() => renderTableBatched(data, endIndex));
+        } else {
+            // 渲染完成，更新统计信息
+            updateSummary(tableStatsCache, data.length);
+        }
+    }
+    
+    // 性能优化：更新统计信息
+    function updateSummary(stats, total) {
+        const valid = total - stats.ignoredCount;
+        document.getElementById('summaryText').innerHTML = 
+            `分析完成 | 总计: ${total} | 有效: ${valid} | 忽略: ${stats.ignoredCount} | ` +
+            `<span style="color:var(--success-color)">通过: ${stats.okCount}</span> | ` +
+            `<span style="color:var(--danger-color)">缺失: ${stats.missingCount}</span> | ` +
+            `<span style="color:var(--accent-dark)">顺序错: ${stats.seqCount}</span>` +
+            (stats.qtyCount > 0 ? ` | <span style="color:var(--info-color)">数量错: ${stats.qtyCount}</span>` : '') +
+            (stats.extraCount > 0 ? ` | <span style="color:var(--danger-color)">多余: ${stats.extraCount}</span>` : '');
+    }
+
     function renderTable(data) {
         const tbody = document.getElementById('resultBody');
         tbody.innerHTML = '';
         
-        let missingCount = 0, seqCount = 0, qtyCount = 0, ignoredCount = 0, extraCount = 0, okCount = 0;
-
-        data.forEach(item => {
-            const tr = document.createElement('tr');
-            let resultBadge = '';
-            
-            switch (item.st) {
-                case 'ignored':
-                    tr.className = 'row-ignored';
-                    resultBadge = '<span class="result-badge badge-ignored">已废弃</span>';
-                    ignoredCount++;
-                    break;
-                case 'extra':
-                    tr.className = 'row-extra';
-                    resultBadge = `<span class="result-badge badge-extra" title="接插件已废弃但硬件BOM中仍存在">多余料号</span>`;
-                    extraCount++;
-                    break;
-                case 'missing':
-                    tr.className = 'row-missing';
-                    resultBadge = '<span class="result-badge badge-missing">料号缺失</span>';
-                    missingCount++;
-                    break;
-                case 'seq':
-                    tr.className = 'row-seq';
-                    const tip = item.expectedRow ? `(应在第${item.expectedRow}行)` : '';
-                    resultBadge = `<span class="result-badge badge-seq" title="${tip}">顺序错误</span>`;
-                    seqCount++;
-                    break;
-                case 'qty':
-                    tr.className = 'row-qty';
-                    resultBadge = `<span class="result-badge badge-qty" title="接插件用量: ${item.connQty}, 硬件位号数: ${item.hwQty}">数量不匹配(${item.connQty}/${item.hwQty})</span>`;
-                    qtyCount++;
-                    break;
-                case 'ok':
-                    resultBadge = '<span class="result-badge badge-ok">核对通过</span>';
-                    okCount++;
-                    break;
-                default:
-                    resultBadge = '<span class="result-badge" style="background:#ccc;color:#666;">待检查</span>';
-            }
-
-            let hwRowDisplay = item.hwRow || '-';
-            if (item.hwRows && item.hwRows.length > 1) {
-                hwRowDisplay = `${item.hwRows[0].rowNum || item.hwRows[0]} <small style="color:var(--text-muted)">(+${item.hwRows.length - 1})</small>`;
-            }
-
-            tr.innerHTML = `
-                <td>${item.id}</td>
-                <td>${item.cat}</td>
-                <td class="c-name">${item.name}</td>
-                <td class="c-pn">${item.pn}</td>
-                <td>${hwRowDisplay}</td>
-                <td>${item.connQty || '-'}</td>
-                <td>${item.hwQty || '-'}</td>
-                <td>${resultBadge}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        const total = data.length;
-        const valid = total - ignoredCount;
-        document.getElementById('summaryText').innerHTML = 
-            `分析完成 | 总计: ${total} | 有效: ${valid} | 忽略: ${ignoredCount} | ` +
-            `<span style="color:var(--success-color)">通过: ${okCount}</span> | ` +
-            `<span style="color:var(--danger-color)">缺失: ${missingCount}</span> | ` +
-            `<span style="color:var(--accent-dark)">顺序错: ${seqCount}</span>` +
-            (qtyCount > 0 ? ` | <span style="color:var(--info-color)">数量错: ${qtyCount}</span>` : '') +
-            (extraCount > 0 ? ` | <span style="color:var(--danger-color)">多余: ${extraCount}</span>` : '');
+        // 缓存数据
+        tableDataCache = data;
+        tableStatsCache = calculateStats(data);
         
         document.getElementById('resultArea').style.display = 'block';
+        
+        // 小数据直接渲染，大数据分批渲染
+        if (data.length <= VIRTUAL_SCROLL_THRESHOLD) {
+            // 小数据：直接一次性渲染
+            const html = data.map(item => createTableRowHTML(item)).join('');
+            tbody.innerHTML = html;
+            updateSummary(tableStatsCache, data.length);
+        } else {
+            // 大数据：分批渲染，避免阻塞主线程
+            renderTableBatched(data, 0);
+        }
     }
 </script>
 </body>

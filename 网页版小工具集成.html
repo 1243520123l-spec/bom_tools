@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOM 综合管理平台</title>
     
+    <!-- 性能优化：预加载关键资源 -->
+    <link rel="preload" href="assets/css/common.css" as="style">
+    
     <!-- 通用样式 -->
     <link href="assets/css/common.css" rel="stylesheet">
     
@@ -308,20 +311,27 @@
             transition: all 0.5s var(--ease-spring);
         }
 
-        iframe.active { 
-            display: block;
-            animation: iframeFadeIn 0.5s var(--ease-spring);
-        }
+        /* 已移至上方规则 */
         
+        /* 性能优化：使用 translate3d 启用 GPU 加速 */
         @keyframes iframeFadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px) scale(0.99);
+                transform: translate3d(0, 10px, 0) scale(0.99);
             }
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translate3d(0, 0, 0) scale(1);
             }
+        }
+        
+        /* 性能优化：iframe 容器启用 GPU 加速 */
+        iframe.active {
+            display: block;
+            animation: iframeFadeIn 0.5s var(--ease-spring);
+            /* 性能优化：启用 GPU 加速 */
+            transform: translateZ(0);
+            will-change: transform, opacity;
         }
 
         /* ========================================

@@ -5,8 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOM 综合管理平台</title>
     
+    <!-- 性能优化：DNS 预解析和预连接 -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    
+    <!-- 性能优化：预加载关键资源 -->
+    <link rel="preload" href="assets/css/common.css" as="style">
+    
     <!-- 通用样式 -->
     <link href="assets/css/common.css" rel="stylesheet">
+    
+    <!-- 性能优化：关键 CSS 内联 -->
+    <style>
+        /* 首屏关键样式 - 避免渲染阻塞 */
+        .hero-section{position:relative;padding:80px 40px;background:linear-gradient(135deg,#B8956B 0%,#D4A574 50%,#A89080 100%);border-radius:32px;color:#fff;margin-bottom:40px;box-shadow:0 12px 40px rgba(0,0,0,0.08);overflow:hidden}
+        .hero-content{position:relative;z-index:1;text-align:center}
+        .hero-title{font-size:2.5rem;font-weight:700;margin-bottom:16px;letter-spacing:-0.02em;text-shadow:0 2px 10px rgba(0,0,0,0.15)}
+        .tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:40px}
+        .tool-card{background:rgba(255,254,251,0.85);border-radius:24px;box-shadow:0 20px 40px -15px rgba(0,0,0,0.05);border:1px solid rgba(184,149,107,0.08);text-decoration:none;color:inherit;display:block;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+        @media(max-width:992px){.tools-grid{grid-template-columns:1fr}}
+    </style>
     
     <style>
         /* 首页特定样式 - Bento Grid 风格 */
@@ -31,6 +49,7 @@
             pointer-events: none;
         }
         
+        /* 性能优化：减少动画复杂度，使用更高效的 transform */
         .hero-section::after {
             content: '';
             position: absolute;
@@ -39,13 +58,19 @@
             width: 60%;
             height: 150%;
             background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%);
-            animation: shimmer 10s ease-in-out infinite;
+            animation: shimmer 15s ease-in-out infinite;
+            /* 性能优化：启用 GPU 加速 */
+            transform: translateZ(0);
+            will-change: transform;
         }
         
+        /* 性能优化：减少重绘，仅使用 transform */
         @keyframes shimmer {
-            0%, 100% { transform: translateX(-30%) rotate(0deg); }
-            50% { transform: translateX(30%) rotate(5deg); }
+            0%, 100% { transform: translate3d(-30%, 0, 0) rotate(0deg); }
+            50% { transform: translate3d(30%, 0, 0) rotate(5deg); }
         }
+        
+        /* 已移至上方规则 */
         
         .hero-content {
             position: relative;
@@ -59,7 +84,10 @@
             margin: 0 auto 24px;
             opacity: 0.95;
             position: relative;
-            animation: float 6s ease-in-out infinite;
+            animation: float 8s ease-in-out infinite;
+            /* 性能优化：启用 GPU 加速 */
+            transform: translateZ(0);
+            will-change: transform;
         }
         
         .hero-icon svg {
@@ -69,9 +97,10 @@
             filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
         }
         
+        /* 性能优化：使用 translate3d 启用 GPU 加速 */
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            50% { transform: translate3d(0, -8px, 0); }
         }
         
         .hero-title {
@@ -128,9 +157,11 @@
         }
         
         .tool-card:hover {
-            transform: translateY(-8px) scale(1.02);
+            transform: translate3d(0, -8px, 0) scale(1.02);
             box-shadow: var(--card-shadow-hover);
             border-color: var(--card-border-strong);
+            /* 性能优化：悬停时启用 GPU 加速 */
+            will-change: transform;
         }
         
         .tool-card-image {

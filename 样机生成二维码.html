@@ -9,12 +9,15 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <!-- CDN资源加载 - 使用defer和async优化 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@7.5.0/build/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- 性能优化：预加载关键脚本 -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" as="script">
+    
+    <!-- CDN资源加载 - 使用defer优化 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.5.0/build/index.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
     
     <!-- 通用样式 -->
     <link href="assets/css/common.css" rel="stylesheet">
@@ -157,14 +160,15 @@
             animation: slideUpFade 0.4s var(--ease-spring);
         }
         
+        /* 性能优化：使用 translate3d 启用 GPU 加速 */
         @keyframes slideUpFade {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translate3d(0, 10px, 0);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translate3d(0, 0, 0);
             }
         }
         
@@ -182,12 +186,30 @@
             margin-bottom: 25px;
             overflow: hidden;
             border: 1px solid var(--card-border);
-            transition: all 0.4s var(--ease-spring);
+            transition: box-shadow 0.4s var(--ease-spring), border-color 0.4s var(--ease-spring);
+            /* 性能优化：限制渲染范围 */
+            contain: layout style;
         }
         
         .log-container-custom:hover {
             box-shadow: var(--card-shadow-hover);
             border-color: var(--card-border-strong);
+        }
+        
+        /* 性能优化：日志区域滚动优化 */
+        .log-area-custom {
+            padding: 24px;
+            max-height: 280px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            background: rgba(255, 254, 251, 0.5);
+            /* 性能优化：启用硬件加速滚动 */
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            scroll-behavior: smooth;
         }
         
         .log-container-custom::before {
