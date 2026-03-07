@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>样机SN二维码批量生成工具 - 专业版</title>
     
-    <!-- DNS预解析和预连接 -->
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    
-    <!-- CDN资源 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <!-- 本地JS库 - 加载速度更快 -->
+    <script src="assets/js/lib/xlsx.min.js" defer></script>
+    <script src="assets/js/lib/qrcode.min.js" defer></script>
+    <script src="assets/js/lib/jspdf.umd.min.js" defer></script>
+    <script src="assets/js/lib/html2canvas.min.js" defer></script>
+    <script src="assets/js/lib/jszip.min.js" defer></script>
+    <script src="assets/js/lib/filesaver.min.js" defer></script>
     
     <!-- 通用样式 -->
     <link href="assets/css/common.css" rel="stylesheet">
@@ -622,6 +618,54 @@
 </head>
 <body>
 
+<!-- 加载提示 -->
+<div id="pageLoading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,254,251,0.98);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#B8956B;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+    <p style="margin-top:20px;color:#718096;font-weight:600;font-size:14px;">正在加载组件...</p>
+    <p style="margin-top:8px;color:#a0aec0;font-size:12px;">首次加载可能需要几秒钟</p>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</div>
+
+<script>
+// 库加载完成后隐藏加载提示（检查所有必需的库，带超时保护）
+let checkAttempts = 0;
+const MAX_CHECK_ATTEMPTS = 50; // 5秒超时 (50 * 100ms)
+
+function checkLibraries() {
+    if (typeof XLSX !== 'undefined' && typeof QRCode !== 'undefined' &&
+        typeof window.jspdf !== 'undefined' && typeof JSZip !== 'undefined') {
+        const loading = document.getElementById('pageLoading');
+        if (loading) {
+            loading.style.opacity = '0';
+            loading.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => loading.remove(), 300);
+        }
+    } else if (checkAttempts++ < MAX_CHECK_ATTEMPTS) {
+        setTimeout(checkLibraries, 100);
+    } else {
+        // 超时后显示错误信息
+        const loading = document.getElementById('pageLoading');
+        if (loading) {
+            loading.innerHTML = `
+                <div style="text-align:center;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--danger-color)" style="margin-bottom:16px;">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <p style="color:var(--danger-color);font-weight:600;font-size:16px;margin:0;">组件加载超时</p>
+                    <p style="color:#a0aec0;font-size:13px;margin:8px 0 0;">请刷新页面重试</p>
+                    <button onclick="location.reload()" style="margin-top:16px;padding:10px 20px;background:var(--primary-color);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">刷新页面</button>
+                </div>
+            `;
+        }
+    }
+}
+window.addEventListener('load', checkLibraries);
+</script>
+
 <div class="app-container">
     <!-- 页面标题 -->
     <header class="page-header" style="margin-bottom: 30px;">
@@ -731,12 +775,6 @@
                         <option value="14">O 列 (第15列)</option>
                     </select>
                 </div>
-            </div>
-            <div style="margin-top: 15px; padding: 12px; background: var(--info-light); border-radius: var(--radius-md);">
-                <strong style="color: var(--info-color); font-size: 13px;">💡 提示：</strong>
-                <span style="color: var(--text-secondary); font-size: 13px;">
-                    系统会自动识别包含"SN"、"码"、"编号"等关键词的列作为SN码列，包含"名称"、"项目"等关键词的列作为项目名称列。
-                </span>
             </div>
         </div>
         
@@ -881,7 +919,7 @@
                 <div class="template-name">极简标签</div>
                 <div class="template-desc">仅二维码，无边框</div>
             </div>
-            
+
         </div>
 
         <div class="settings-panel">
@@ -902,7 +940,7 @@
                 </div>
                 <div class="setting-item">
                     <label>页面边距 (mm)</label>
-                    <input type="number" id="pageMargin" value="10" min="0" max="50">
+                    <input type="number" id="pageMargin" value="5" min="0" max="50">
                 </div>
                 <div class="setting-item">
                     <label>标签间距 (mm)</label>
@@ -923,6 +961,13 @@
                         <option value="M" selected>中 (15%)</option>
                         <option value="Q">高 (25%)</option>
                         <option value="H">最高 (30%)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>生成的二维码是否需要带边框</label>
+                    <select id="enableBorder">
+                        <option value="false">否</option>
+                        <option value="true">是</option>
                     </select>
                 </div>
             </div>
@@ -1012,7 +1057,20 @@
 let currentStep = 1;
 let tableData = [];
 let selectedTemplate = 'standard';
-let qrCache = new Map(); // 缓存生成的二维码
+let qrCache = new Map(); // 缓存生成的二维码（限制大小防止内存泄漏）
+const MAX_QR_CACHE_SIZE = 100; // 最大缓存数量
+
+// 安全地添加到缓存（LRU策略）
+function addToQRCache(key, value) {
+    if (qrCache.size >= MAX_QR_CACHE_SIZE) {
+        // 删除最老的缓存项
+        const firstKey = qrCache.keys().next().value;
+        if (firstKey !== undefined) {
+            qrCache.delete(firstKey);
+        }
+    }
+    qrCache.set(key, value);
+}
 
 // ========================================
 // 步骤导航
@@ -1117,17 +1175,20 @@ async function handleFile(file) {
         document.getElementById('statsBar').style.display = 'flex';
         document.getElementById('btnToStep2').disabled = false;
         
-        // 更新上传区域显示
-        document.getElementById('uploadArea').innerHTML = `
+        // 更新上传区域显示（使用DOM API防止XSS）
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.innerHTML = `
             <svg class="upload-icon" viewBox="0 0 24 24" style="fill: var(--success-color);">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
             </svg>
             <h3 style="margin-bottom: 10px; color: var(--success-color);">文件上传成功</h3>
-            <p style="color: var(--text-muted);">${file.name}</p>
+            <p style="color: var(--text-muted);"></p>
             <button class="btn btn-secondary" style="margin-top: 15px; position: relative; z-index: 20;" onclick="location.reload()">
                 重新上传
             </button>
         `;
+        // 安全地设置文件名（防止XSS）
+        uploadArea.querySelector('p').textContent = file.name;
         
         // 监听列选择变化
         document.getElementById('snColumnSelect').addEventListener('change', () => {
@@ -1314,6 +1375,11 @@ document.querySelectorAll('.template-card').forEach(card => {
         document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         selectedTemplate = card.dataset.template;
+
+        // 自动刷新预览
+        if (tableData.length > 0) {
+            refreshPreview();
+        }
     });
 });
 
@@ -1352,10 +1418,11 @@ function getSettings() {
         template: selectedTemplate,
         qrSize: parseInt(document.getElementById('qrSize').value) || 150,
         colsPerRow: parseInt(document.getElementById('colsPerRow').value) || 4,
-        pageMargin: parseInt(document.getElementById('pageMargin').value) || 10,
+        pageMargin: parseInt(document.getElementById('pageMargin').value) || 5,
         labelGap: parseInt(document.getElementById('labelGap').value) || 5,
         paperSize: document.getElementById('paperSize').value,
-        errorCorrection: document.getElementById('errorCorrection').value
+        errorCorrection: document.getElementById('errorCorrection').value,
+        enableBorder: document.getElementById('enableBorder').value === 'true'
     };
 }
 
@@ -1372,36 +1439,63 @@ function getTemplateName() {
 async function createQRLabel(item, settings) {
     const label = document.createElement('div');
     label.className = `qr-label style-${settings.template}`;
-    
-    // 生成二维码
-    let qrDataUrl;
+
+    // 使用 qrcodejs 库生成二维码
+    const qrContainer = document.createElement('div');
+    qrContainer.style.display = 'none';
+    document.body.appendChild(qrContainer);
+
     const cacheKey = `${item.sn}_${settings.qrSize}_${settings.errorCorrection}`;
-    
+
+    let qrDataUrl;
     if (qrCache.has(cacheKey)) {
         qrDataUrl = qrCache.get(cacheKey);
+        qrContainer.remove();
     } else {
-        qrDataUrl = await QRCode.toDataURL(item.sn || 'N/A', {
+        // 创建二维码
+        const qr = new QRCode(qrContainer, {
+            text: item.sn || 'N/A',
             width: settings.qrSize,
-            margin: 1,
-            errorCorrectionLevel: settings.errorCorrection,
-            color: { dark: '#2D3748', light: '#FFFFFF' }
+            height: settings.qrSize,
+            colorDark: '#2D3748',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel[settings.errorCorrection.toUpperCase()] || QRCode.CorrectLevel.H
         });
-        qrCache.set(cacheKey, qrDataUrl);
+
+        // 等待二维码生成后获取dataURL
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                const img = qrContainer.querySelector('img');
+                if (img && img.src) {
+                    qrDataUrl = img.src;
+                    addToQRCache(cacheKey, qrDataUrl);
+                } else {
+                    // fallback to canvas
+                    const canvas = qrContainer.querySelector('canvas');
+                    if (canvas) {
+                        qrDataUrl = canvas.toDataURL();
+                        addToQRCache(cacheKey, qrDataUrl);
+                    }
+                }
+                qrContainer.remove();
+                resolve();
+            }, 50);
+        });
     }
-    
-    // 标准处理
+
+    // 创建图片元素
     const img = document.createElement('img');
     img.src = qrDataUrl;
     img.alt = item.sn;
     label.appendChild(img);
-    
+
     if (settings.template !== 'minimal') {
         const text = document.createElement('div');
         text.className = 'qr-label-text';
         text.textContent = item.displayName || `${item.sn}${item.name ? '-' + item.name : ''}`;
         label.appendChild(text);
     }
-    
+
     return label;
 }
 
@@ -1416,21 +1510,51 @@ async function exportImages() {
     const zip = new JSZip();
     const settings = getSettings();
     const total = tableData.length;
-    
+
     for (let i = 0; i < total; i++) {
         const item = tableData[i];
-        const qrDataUrl = await QRCode.toDataURL(item.sn || 'N/A', {
+
+        // 使用 qrcodejs 库生成二维码
+        const qrContainer = document.createElement('div');
+        qrContainer.style.display = 'none';
+        document.body.appendChild(qrContainer);
+
+        const qr = new QRCode(qrContainer, {
+            text: item.sn || 'N/A',
             width: 300,
-            margin: 1,
-            errorCorrectionLevel: settings.errorCorrection
+            height: 300,
+            colorDark: '#000000',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel[settings.errorCorrection.toUpperCase()] || QRCode.CorrectLevel.H
         });
-        
-        const base64Data = qrDataUrl.split(',')[1];
-        zip.file(`${item.sn || 'qr'}_${i + 1}.png`, base64Data, {base64: true});
-        
+
+        // 等待二维码生成
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                const img = qrContainer.querySelector('img');
+                let qrDataUrl;
+                if (img && img.src) {
+                    qrDataUrl = img.src;
+                } else {
+                    const canvas = qrContainer.querySelector('canvas');
+                    if (canvas) {
+                        qrDataUrl = canvas.toDataURL();
+                    }
+                }
+
+                if (qrDataUrl) {
+                    const base64Data = qrDataUrl.split(',')[1];
+                    zip.file(`${item.sn || 'qr'}_${i + 1}.png`, base64Data, {base64: true});
+                }
+
+                qrContainer.remove();
+                resolve();
+            }, 50);
+        });
+
         updateProgress(i + 1, total, '正在生成图片...');
     }
-    
+
     const blob = await zip.generateAsync({type: 'blob'});
     saveAs(blob, `二维码图片_${getTimestamp()}.zip`);
     showProgress(false);
@@ -1443,99 +1567,153 @@ async function exportPDF() {
     showProgress(true);
     const { jsPDF } = window.jspdf;
     const settings = getSettings();
-    
-    // 创建纸张
+
+    // 固定使用A4纸张
     const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: settings.paperSize
+        format: 'a4'
     });
-    
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = settings.pageMargin;
-    const availableWidth = pageWidth - margin * 2;
-    const availableHeight = pageHeight - margin * 2;
-    
+
+    const pageWidth = pdf.internal.pageSize.getWidth();  // A4: 210mm
+    const pageHeight = pdf.internal.pageSize.getHeight(); // A4: 297mm
+    const margin = settings.pageMargin || 5;  // 默认页边距5mm
+
     const cols = settings.colsPerRow;
-    const qrSize = Math.min(35, (availableWidth - (cols - 1) * settings.labelGap) / cols);
-    
-    // 根据二维码大小自动计算字体大小（比例系数0.4）
-    // 例如：35mm二维码 -> 14pt字体
+
+    // 计算二维码大小（基于可用宽度和列数）
+    const availableWidth = pageWidth - margin * 2;
+    const qrSize = Math.min(40, (availableWidth - (cols - 1) * settings.labelGap) / cols);
+
+    // 计算字体大小
     const fontSize = Math.max(8, Math.min(16, qrSize * 0.4));
-    const lineHeight = fontSize * 0.35; // 行高与字体大小成比例
-    
-    // 动态计算行间距：二维码高度 + 文字区域高度 + 间距
-    const maxTextLines = 2; // 预估最多2行文字
-    const textAreaHeight = maxTextLines * lineHeight;
-    const rowSpacing = qrSize + textAreaHeight + 5;
-    const rows = Math.floor(availableHeight / rowSpacing);
-    
-    let currentX = margin;
+    const lineHeight = fontSize * 0.35;
+    const textBottomGap = 3;  // 文字底部到下一行二维码的间隙
+
+    // 计算单个标签的总高度（二维码 + 文字区域 + 文字底部间隙）
+    const labelHeight = qrSize + lineHeight * 2 + textBottomGap;
+
+    // 计算可容纳的行数
+    const availableHeight = pageHeight - margin * 2;
+    const maxRows = Math.floor(availableHeight / labelHeight);
+
+    // X向居中计算
+    const actualRowWidth = cols * qrSize + (cols - 1) * settings.labelGap;
+    const startX = (pageWidth - actualRowWidth) / 2;
+
+    let currentX = startX;
     let currentY = margin;
     let colIndex = 0;
     let rowIndex = 0;
-    
+
     const total = tableData.length;
-    
+
     for (let i = 0; i < total; i++) {
         const item = tableData[i];
-        
-        // 新页面
-        if (rowIndex >= rows && i < total - 1) {
+
+        // 检查是否需要新页面（在添加内容之前检查，确保不被截断）
+        if (rowIndex >= maxRows) {
             pdf.addPage();
-            currentX = margin;
-            currentY = margin;
             colIndex = 0;
             rowIndex = 0;
+            currentX = startX;
+            currentY = margin;
         }
-        
+
+        // 先绘制线框（如果启用）- 在添加内容之前绘制
+        if (settings.enableBorder) {
+            const lineWidth = 0.3; // 线框宽度
+            const borderPadding = 1.5; // 内边距（减小避免交叉）
+
+            // 计算实际内容高度
+            let actualContentHeight = qrSize;
+            if (settings.template !== 'minimal') {
+                actualContentHeight = qrSize + lineHeight * 2;
+            }
+
+            // 计算线框的矩形范围（不包含底部间距）
+            const borderX = currentX - borderPadding;
+            const borderY = currentY - borderPadding;
+            const borderW = qrSize + borderPadding * 2;
+            const borderH = actualContentHeight + borderPadding * 2;
+
+            // 绘制矩形线框
+            pdf.setDrawColor(0); // 黑色边框
+            pdf.setLineWidth(lineWidth);
+            pdf.rect(borderX, borderY, borderW, borderH, 'S');
+        }
+
         // 生成二维码
-        const qrDataUrl = await QRCode.toDataURL(item.sn || 'N/A', {
-            width: 200,
-            margin: 1,
-            errorCorrectionLevel: settings.errorCorrection
+        const qrContainer = document.createElement('div');
+        qrContainer.style.display = 'none';
+        document.body.appendChild(qrContainer);
+
+        const qr = new QRCode(qrContainer, {
+            text: item.sn || 'N/A',
+            width: Math.round(qrSize * 3.78), // mm to px
+            height: Math.round(qrSize * 3.78),
+            colorDark: '#000000',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel[settings.errorCorrection.toUpperCase()] || QRCode.CorrectLevel.H
         });
-        
+
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, 50);
+        });
+
+        let qrDataUrl;
+        const img = qrContainer.querySelector('img');
+        if (img && img.src) {
+            qrDataUrl = img.src;
+        } else {
+            const canvas = qrContainer.querySelector('canvas');
+            if (canvas) {
+                qrDataUrl = canvas.toDataURL();
+            }
+        }
+
+        qrContainer.remove();
+
         // 添加二维码图片
         pdf.addImage(qrDataUrl, 'PNG', currentX, currentY, qrSize, qrSize);
-        
-        // 添加文字 - 字体大小根据二维码大小自动计算
+
+        // 添加文字
         let actualTextHeight = 0;
         if (settings.template !== 'minimal') {
             pdf.setFont('times', 'normal');
             pdf.setFontSize(fontSize);
             const displayText = item.displayName || `${item.sn}${item.name ? '-' + item.name : ''}`;
-            
-            // 计算文本是否需要换行
+
             const maxWidth = qrSize;
             const textLines = pdf.splitTextToSize(displayText, maxWidth);
-            
-            // 绘制多行文本
+
             actualTextHeight = textLines.length * lineHeight;
-            
-            // 文字位置：二维码底部 + 小间距
+
             const textY = currentY + qrSize + lineHeight;
             pdf.text(textLines, currentX + qrSize / 2, textY, {
                 align: 'center'
             });
         }
-        
-        // 更新位置 - 使用动态行高，确保文字不交叉
+
+        // 更新位置
         colIndex++;
         if (colIndex >= cols) {
+            // 换行
             colIndex = 0;
             rowIndex++;
-            currentX = margin;
-            // 行高 = 二维码大小 + 实际文字高度 + 间距
-            currentY += qrSize + Math.max(actualTextHeight, lineHeight) + 3;
+            currentX = startX;
+            // 下一行的Y坐标 = 当前行Y + 标签总高度
+            currentY += labelHeight;
         } else {
+            // 同行下一个
             currentX += qrSize + settings.labelGap;
         }
-        
+
         updateProgress(i + 1, total, '正在生成PDF...');
     }
-    
+
     pdf.save(`二维码标签_${getTimestamp()}.pdf`);
     showProgress(false);
 }

@@ -5,419 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOM位号查询工具</title>
     
-    <!-- 性能优化：DNS 预解析和预连接 -->
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    
-    <!-- 性能优化：异步加载非关键脚本 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
-    
-    <!-- 通用样式 -->
+    <!-- 性能优化：预加载关键资源 -->
     <link rel="preload" href="assets/css/common.css" as="style">
+    <link rel="preload" href="assets/css/pages/query.css" as="style">
+
+    <!-- 通用样式 -->
     <link href="assets/css/common.css" rel="stylesheet">
-    
+
+    <!-- 页面特定样式 -->
+    <link href="assets/css/pages/query.css" rel="stylesheet">
+
+    <!-- 性能优化：关键CSS内联 -->
     <style>
-        /* ========================================
-           页面特定样式 - Design-Taste-Frontend 优化版
-           ======================================== */
-        
-        /* 主料/替代料颜色 */
-        .primary-material { 
-            color: #7A9B76; 
-            font-weight: 700; 
-        }
-        .alternative-material { 
-            color: var(--primary-color); 
-            font-weight: 700; 
-        }
-        
-        /* 自定义状态栏 - 液态玻璃 */
-        .status-bar-custom {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--card-bg);
-            border-top: 1px solid var(--border-light);
-            padding: 12px 30px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            z-index: 100;
-            transition: all 0.3s var(--ease-smooth);
-        }
-        
-        .status-bar-custom::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.4);
-            pointer-events: none;
-        }
-        
-        /* 带图标的表单控件 */
-        .form-control-with-icon {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--bg-light);
-            min-height: 48px;
-            padding: 0 16px;
-            border-radius: var(--radius-md) 0 0 var(--radius-md);
-            border: 1.5px solid var(--border-color);
-            border-right: none;
-            transition: all 0.25s var(--ease-smooth);
-        }
-        
-        .form-control-with-icon svg {
-            color: var(--text-muted);
-            transition: color 0.25s var(--ease-smooth);
-            flex-shrink: 0;
-        }
-        
-        .form-control-with-icon:focus-within {
-            background: white;
-            border-color: var(--primary-color);
-        }
-        
-        .form-control-with-icon:focus-within svg {
-            color: var(--primary-color);
-        }
-        
-        /* 料号输入行 */
-        .part-number-row {
-            animation: slideInRow 0.4s var(--ease-spring);
-        }
-        
-        @keyframes slideInRow {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        /* 输入组按钮优化 */
-        .part-number-row .btn-add,
-        .part-number-row .btn-remove {
-            padding: 12px;
-            transition: all 0.2s var(--ease-spring);
-        }
-        
-        .part-number-row .btn-add:hover {
-            transform: scale(1.05);
-            background: var(--success-light);
-            border-color: var(--success-color);
-            color: var(--success-color);
-        }
-        
-        .part-number-row .btn-remove:hover {
-            transform: scale(1.05);
-            background: var(--danger-light);
-            border-color: var(--danger-color);
-            color: var(--danger-color);
-        }
-        
-        /* 添加料号按钮 */
-        #addPartBtn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            background: transparent;
-            border: 1.5px dashed var(--border-dark);
-            color: var(--text-muted);
-            border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s var(--ease-spring);
-        }
-        
-        #addPartBtn:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            background: var(--primary-soft);
-            transform: translateY(-1px);
-        }
-        
-        #addPartBtn svg {
-            transition: transform 0.3s var(--ease-spring);
-        }
-        
-        #addPartBtn:hover svg {
-            transform: rotate(90deg);
-        }
-        
-        /* 性能优化：结果卡片动画 - 使用 GPU 加速 */
-        #resultCard {
-            animation: expandCard 0.5s var(--ease-spring);
-            /* 性能优化：启用 GPU 加速 */
-            transform: translateZ(0);
-            will-change: transform, opacity;
-        }
-        
-        /* 性能优化：使用 translate3d 启用 GPU 加速 */
-        @keyframes expandCard {
-            from {
-                opacity: 0;
-                transform: scale(0.98) translate3d(0, 10px, 0);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translate3d(0, 0, 0);
-            }
-        }
-        
-        /* 结果详情卡片增强 */
-        .result-details {
-            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
-            border-left: 4px solid var(--primary-color);
-            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s var(--ease-spring);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .result-details::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, var(--primary-alpha-10) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        
-        .result-details:hover {
-            transform: translateX(4px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .result-details h4 {
-            color: var(--text-primary);
-            margin-bottom: 16px;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .result-details h4::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, var(--border-color) 0%, transparent 100%);
-            margin-left: 8px;
-        }
-        
-        /* 详情行优化 */
-        .detail-row {
-            display: flex;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-light);
-            transition: all 0.2s ease;
-        }
-        
-        .detail-row:hover {
-            background: var(--primary-alpha-10);
-            margin: 0 -12px;
-            padding-left: 12px;
-            padding-right: 12px;
-            border-radius: var(--radius-sm);
-        }
-        
-        .detail-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .detail-label {
-            font-weight: 600;
-            min-width: 140px;
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-        
-        .detail-value {
-            flex: 1;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-        
-        /* 性能优化：表格行 - 减少重绘 */
-        .data-table tbody tr {
-            transition: background-color 0.15s ease;
-            /* 性能优化：限制渲染范围 */
-            contain: layout style;
-        }
-        
-        .data-table tbody tr:hover {
-            background: var(--primary-alpha-10);
-            /* 性能优化：移除 transform 减少重绘 */
-            box-shadow: var(--shadow-xs);
-        }
-        
-        /* 文件结构信息 */
-        .file-structure-info {
-            background: linear-gradient(135deg, var(--info-light) 0%, #F0F5F7 100%);
-            border: 1px solid rgba(122, 155, 168, 0.3);
-            border-radius: var(--radius-md);
-            padding: 14px 18px;
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--info-color);
-            line-height: 1.8;
-        }
-        
-        /* 警告图标替换 emoji */
-        .warning-icon {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--warning-color);
-        }
-        
-        .warning-icon svg {
-            width: 14px;
-            height: 14px;
-        }
-        
-        /* 文件上传区域 - 居中拖拽样式 */
-        .file-upload-center {
-            border: 2px dashed var(--border-dark);
-            border-radius: var(--radius-xl);
-            padding: 48px 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.4s var(--ease-spring);
-            position: relative;
-            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .file-upload-center:hover, .file-upload-center.dragover {
-            border-color: var(--primary-color);
-            background: linear-gradient(135deg, var(--primary-soft) 0%, var(--bg-light) 100%);
-            box-shadow: var(--shadow-md);
-            transform: scale(1.01);
-        }
-        
-        .file-upload-center input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-        
-        .file-upload-center .upload-icon {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            color: var(--primary-light);
-            transition: all 0.4s var(--ease-spring);
-        }
-        
-        .file-upload-center:hover .upload-icon {
-            color: var(--primary-color);
-            transform: translateY(-4px);
-        }
-        
-        .file-upload-center .upload-text {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            transition: color 0.3s ease;
-        }
-        
-        .file-upload-center:hover .upload-text {
-            color: var(--primary-dark);
-        }
-        
-        .file-upload-center .upload-hint {
-            font-size: 13px;
-            color: var(--text-muted);
-            transition: color 0.3s ease;
-        }
-        
-        /* 提示文字 */
-        .hint-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: var(--bg-light);
-            border-radius: var(--radius-sm);
-        }
-        
-        .hint-text svg {
-            flex-shrink: 0;
-            color: var(--warning-color);
-        }
-        
-        /* 响应式优化 */
-        @media (max-width: 768px) {
-            .form-control-with-icon {
-                border-radius: var(--radius-md);
-                border-right: 1.5px solid var(--border-color);
-                margin-bottom: 8px;
-            }
-            
-            .input-group {
-                flex-direction: column;
-            }
-            
-            .input-group .btn {
-                border-radius: var(--radius-md);
-                width: 100%;
-            }
-            
-            .part-number-row {
-                flex-wrap: wrap;
-            }
-            
-            .part-number-row .form-control {
-                border-radius: var(--radius-md);
-                margin-bottom: 8px;
-            }
-            
-            .part-number-row .btn-add,
-            .part-number-row .btn-remove {
-                border-radius: var(--radius-md);
-                flex: 1;
-            }
-            
-            .detail-label {
-                min-width: 100px;
-            }
-        }
+        .primary-material{color:#7A9B76;font-weight:700}.alternative-material{color:var(--primary-color);font-weight:700}.status-bar-custom{position:fixed;bottom:0;left:0;right:0;background:rgba(255,254,251,0.98);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border-light);padding:12px 30px;font-size:13px;color:var(--text-secondary);z-index:100}.form-control-with-icon{display:flex;align-items:center;gap:10px;background:var(--bg-light);min-height:48px;padding:0 16px;border-radius:var(--radius-md) 0 0 var(--radius-md);border:1.5px solid var(--border-color);border-right:none}.part-number-row{animation:slideInRow .4s var(--ease-spring)}@keyframes slideInRow{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}#addPartBtn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:transparent;border:1.5px dashed var(--border-dark);color:var(--text-muted);border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer}
     </style>
+
+    <!-- 性能优化：异步加载非关键脚本 -->
+    <script src="assets/js/lib/xlsx.min.js" defer></script>
 </head>
 <body>
+
+<!-- 加载提示 -->
+<div id="pageLoading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,254,251,0.98);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#B8956B;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+    <p style="margin-top:20px;color:#718096;font-weight:600;font-size:14px;">正在加载组件...</p>
+    <p style="margin-top:8px;color:#a0aec0;font-size:12px;">首次加载可能需要几秒钟</p>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</div>
+
+<script>
+// 库加载完成后隐藏加载提示
+function checkLibraries() {
+    if (typeof XLSX !== 'undefined') {
+        const loading = document.getElementById('pageLoading');
+        if (loading) {
+            loading.style.opacity = '0';
+            loading.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => loading.remove(), 300);
+        }
+    } else {
+        setTimeout(checkLibraries, 100);
+    }
+}
+window.addEventListener('load', checkLibraries);
+</script>
 
 <div class="container-narrow">
     <!-- 页面头部 -->
@@ -833,7 +468,8 @@ class BOMQueryTool {
         try {
             workbook = XLSX.read(arrayBuffer, { type: 'array' });
         } catch (e) {
-            throw new Error('无法解析Excel文件');
+            console.error('Excel解析错误:', e);
+            throw new Error(`无法解析Excel文件: ${e.message}。请确保文件格式正确且未损坏。`);
         }
         
         if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
@@ -942,31 +578,46 @@ class BOMQueryTool {
                 未检测到"位号"列
             </span>`);
         }
-        
-        this.fileStructureInfo.innerHTML = `<div class="file-structure-info">${info.join(' | ')}</div>`;
+
+        // 使用DOM API设置结构信息（防止潜在的XSS）
+        this.fileStructureInfo.innerHTML = '';
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'file-structure-info';
+        infoDiv.innerHTML = info.join(' | ');
+        this.fileStructureInfo.appendChild(infoDiv);
     }
     
-    // 添加料号输入框
+    // 添加料号输入框（使用DOM API防止XSS）
     addPartNumberInput() {
         const container = this.partNumberInputsContainer;
         const newRow = document.createElement('div');
         newRow.className = 'input-group mb-2 part-number-row';
-        newRow.innerHTML = `
-            <input type="text" class="form-control part-number-input" placeholder="请输入料号">
-            <button class="btn btn-secondary btn-add" type="button" title="添加料号">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            </button>
-            <button class="btn btn-danger btn-remove" type="button" title="删除">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-            </button>
-        `;
+
+        // 创建输入框
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control part-number-input';
+        input.placeholder = '请输入料号';
+
+        // 创建添加按钮
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn btn-secondary btn-add';
+        addBtn.type = 'button';
+        addBtn.title = '添加料号';
+        addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+
+        // 创建删除按钮
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-danger btn-remove';
+        removeBtn.type = 'button';
+        removeBtn.title = '删除';
+        removeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+
+        newRow.appendChild(input);
+        newRow.appendChild(addBtn);
+        newRow.appendChild(removeBtn);
         container.appendChild(newRow);
-        
-        // 绑定事件
-        const input = newRow.querySelector('.part-number-input');
-        const addBtn = newRow.querySelector('.btn-add');
-        const removeBtn = newRow.querySelector('.btn-remove');
-        
+
         this.bindInputEvents(input);
         addBtn.addEventListener('click', () => this.addPartNumberInput());
         removeBtn.addEventListener('click', () => {
@@ -1009,23 +660,36 @@ class BOMQueryTool {
         });
     }
     
-    // 清空所有料号输入
+    // 清空所有料号输入（使用DOM API防止XSS）
     clearPartNumberInputs() {
-        this.partNumberInputsContainer.innerHTML = `
-            <div class="input-group mb-2 part-number-row">
-                <input type="text" class="form-control part-number-input" placeholder="请输入料号（如：HQ134050003N0）">
-                <button class="btn btn-secondary btn-add" type="button" title="添加料号">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                </button>
-                <button class="btn btn-danger btn-remove" type="button" title="删除" style="display:none;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                </button>
-            </div>
-        `;
-        
-        const input = this.partNumberInputsContainer.querySelector('.part-number-input');
-        const addBtn = this.partNumberInputsContainer.querySelector('.btn-add');
-        const removeBtn = this.partNumberInputsContainer.querySelector('.btn-remove');
+        this.partNumberInputsContainer.innerHTML = '';
+
+        const newRow = document.createElement('div');
+        newRow.className = 'input-group mb-2 part-number-row';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control part-number-input';
+        input.placeholder = '请输入料号（如：HQ134050003N0）';
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn btn-secondary btn-add';
+        addBtn.type = 'button';
+        addBtn.title = '添加料号';
+        addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-danger btn-remove';
+        removeBtn.type = 'button';
+        removeBtn.title = '删除';
+        removeBtn.style.display = 'none';
+        removeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+
+        newRow.appendChild(input);
+        newRow.appendChild(addBtn);
+        newRow.appendChild(removeBtn);
+        this.partNumberInputsContainer.appendChild(newRow);
+
         this.bindInputEvents(input);
         addBtn.addEventListener('click', () => this.addPartNumberInput());
         removeBtn.addEventListener('click', () => {

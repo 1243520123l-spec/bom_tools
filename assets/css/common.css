@@ -6,9 +6,9 @@
  */
 
 /* ========================================
-   1. 字体导入 - Geist 字体系列
+   1. 字体导入 - 本地字体方案
    ======================================== */
-@import url('https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-sans/style.css');
+@import url('../fonts/local-fonts.css');
 
 /* ========================================
    2. CSS变量定义 - Design System
@@ -495,12 +495,10 @@ code {
 }
 
 /* ========================================
-   7. 卡片/面板 - 液态玻璃效果
+   7. 卡片/面板 - 性能优化版本
    ======================================== */
 .card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 254, 251, 0.95);
     border-radius: var(--radius-xl);
     box-shadow: var(--card-shadow);
     border: 1px solid var(--card-border);
@@ -567,8 +565,7 @@ code {
 }
 
 .panel {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 254, 251, 0.95);
     padding: 28px;
     border-radius: var(--radius-xl);
     box-shadow: var(--card-shadow);
@@ -701,6 +698,16 @@ select.form-control, select {
     cursor: pointer;
 }
 
+/* 限制文件上传区域内的图标尺寸 */
+.file-upload-wrapper svg,
+.file-upload-center svg,
+.drop-zone svg {
+    width: 48px !important;
+    height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+}
+
 .active-upload {
     border-style: solid;
     background: linear-gradient(135deg, var(--success-light) 0%, #F5FAF4 100%) !important;
@@ -756,16 +763,6 @@ select.form-control, select {
 /* 性能优化：大数据表格行优化 */
 .data-table tbody tr {
     transition: background-color 0.15s ease;
-    /* 性能优化：减少重绘 */
-    contain: layout style;
-}
-
-/* 性能优化：超出视口的表格内容延迟渲染 */
-@media (min-width: 768px) {
-    .data-table tbody tr:nth-child(n+50) {
-        content-visibility: auto;
-        contain-intrinsic-size: 0 50px;
-    }
 }
 
 .data-table {
@@ -817,8 +814,7 @@ select.form-control, select {
    ======================================== */
 .result-area {
     margin-top: 30px;
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 254, 251, 0.95);
     padding: 30px;
     border-radius: var(--radius-xl);
     box-shadow: var(--card-shadow);
@@ -968,8 +964,7 @@ select.form-control, select {
 }
 
 .log-container {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 254, 251, 0.95);
     border-radius: var(--radius-xl);
     box-shadow: var(--card-shadow);
     margin-bottom: 25px;
@@ -1057,8 +1052,9 @@ select.form-control, select {
 }
 
 .notification {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 254, 251, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
     padding: 16px 20px;
@@ -1286,6 +1282,18 @@ body::after {
 /* ========================================
    21. 性能优化辅助类
    ======================================== */
+
+/* 性能优化：低端设备禁用 backdrop-filter */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .btn-header,
+    .status-bar,
+    .status-bar-custom,
+    .notification {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(255, 254, 251, 0.98);
+    }
+}
 
 /* GPU 加速 */
 .gpu-accelerated {

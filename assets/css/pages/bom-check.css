@@ -1,0 +1,301 @@
+/**
+ * BOM综合管理平台 - BOM检查工具特定样式
+ */
+
+/* ========================================
+   面板标题颜色
+   ======================================== */
+.panel-primary h3 { color: var(--primary-color); }
+.panel-secondary h3 { color: var(--secondary-color); }
+
+/* ========================================
+   信息标签
+   ======================================== */
+.info-tag {
+    font-size: 11px;
+    color: var(--success-color);
+    font-weight: 600;
+    margin-left: 8px;
+    background: var(--success-light);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* ========================================
+   加载状态和摘要文本
+   ======================================== */
+#loadingStatus {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+#summaryText {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
+    padding: 15px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+}
+
+/* ========================================
+   表格特定样式
+   ======================================== */
+.c-name {
+    text-align: left !important;
+    padding-left: 15px;
+    width: 35%;
+}
+
+.c-pn {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* 状态行样式 */
+tr.row-ignored {
+    background: rgba(113, 128, 150, 0.1);
+}
+tr.row-ignored td {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+tr.row-missing {
+    background: rgba(193, 123, 123, 0.1);
+}
+tr.row-seq {
+    background: rgba(212, 165, 116, 0.1);
+}
+tr.row-qty {
+    background: rgba(168, 144, 168, 0.1);
+}
+tr.row-extra {
+    background: rgba(193, 123, 123, 0.1);
+}
+
+/* ========================================
+   徽章样式 - 浮起效果
+   ======================================== */
+.result-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    transition: all 0.3s var(--ease-spring);
+}
+
+.result-badge:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* 料号缺失 - 柔和红色 */
+.badge-missing {
+    background: linear-gradient(135deg, #C17B7B 0%, #B06B6B 100%);
+    color: white;
+}
+
+/* 料号多余 - 浅红色 */
+.badge-extra {
+    background: linear-gradient(135deg, #F5E3E3 0%, #EDD5D5 100%);
+    color: #A05A5A;
+}
+
+/* 顺序错误 - 暖橙色 */
+.badge-seq {
+    background: linear-gradient(135deg, #D4A574 0%, #C8956B 100%);
+    color: white;
+}
+
+/* 数量不匹配 - 暖紫色 */
+.badge-qty {
+    background: linear-gradient(135deg, #A890A8 0%, #988098 100%);
+    color: white;
+}
+
+/* 已废弃 - 暖灰色 */
+.badge-ignored {
+    background: linear-gradient(135deg, #9A8B7A 0%, #8A7B6A 100%);
+    color: white;
+}
+
+/* 核对通过 - 柔和绿色 */
+.badge-ok {
+    background: linear-gradient(135deg, #7A9B76 0%, #6A8B66 100%);
+    color: white;
+}
+
+/* ========================================
+   表单样式
+   ======================================== */
+.form-group {
+    margin-top: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    background: white;
+    transition: all 0.3s var(--ease-spring);
+    color: var(--text-primary);
+}
+
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-alpha-10);
+}
+
+/* ========================================
+   图标样式
+   ======================================== */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-sm { width: 16px; height: 16px; }
+.icon-md { width: 20px; height: 20px; }
+.icon-lg { width: 24px; height: 24px; }
+
+.icon svg {
+    width: 100%;
+    height: 100%;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.header .icon svg {
+    stroke: currentColor;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+
+.panel h3 .icon svg {
+    stroke: currentColor;
+}
+
+.file-upload-wrapper .icon {
+    margin-bottom: 6px;
+    opacity: 0.7;
+    transition: all 0.3s var(--ease-spring);
+}
+
+.file-upload-wrapper:hover .icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.file-upload-wrapper .icon svg {
+    stroke: currentColor;
+}
+
+/* 按钮中的图标 */
+.btn .icon svg {
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
+.btn-header .icon svg {
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+/* ========================================
+   表格性能优化
+   ======================================== */
+.data-table tbody tr {
+    transition: background-color 0.15s ease;
+    contain: layout style;
+}
+
+.data-table tbody {
+    display: block;
+    max-height: 600px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+}
+
+.data-table thead,
+.data-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.data-table tbody tr:hover {
+    background: var(--primary-alpha-10);
+}
+
+/* 表格行分批渲染占位 */
+.table-row-placeholder {
+    height: 50px;
+    background: linear-gradient(90deg, var(--bg-light) 25%, var(--zinc-100) 50%, var(--bg-light) 75%);
+    background-size: 200% 100%;
+    animation: loading-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-pulse {
+    0%, 100% { background-position: 200% 0; }
+    50% { background-position: -200% 0; }
+}
+
+/* ========================================
+   液态玻璃效果增强
+   ======================================== */
+.panel::before,
+.result-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.panel,
+.result-area {
+    position: relative;
+}

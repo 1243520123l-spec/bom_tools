@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOM 智能比对系统</title>
     
-    <!-- 性能优化：DNS 预解析和预连接 -->
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    
     <!-- 性能优化：异步加载非关键脚本 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer></script>
+    <script src="assets/js/lib/xlsx.min.js" defer></script>
+    <script src="assets/js/lib/exceljs.min.js" defer></script>
     
     <!-- 通用样式 -->
     <link rel="preload" href="assets/css/common.css" as="style">
@@ -56,14 +52,97 @@
         /* 表格特定样式 */
         .c-name {
             text-align: left !important;
-            padding-left: 15px;
-            width: 35%;
+            padding-left: 12px;
+            padding-right: 8px;
+            word-break: break-word;
         }
-        
+
         .c-pn {
             font-family: var(--font-mono);
             font-weight: 600;
             color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        /* 表格容器 - 确保正确的滚动 */
+        .table-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* 修复虚拟滚动表格 - 使用!important确保样式优先级 */
+        .data-table {
+            width: 100% !important;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed !important;
+        }
+
+        .data-table thead {
+            display: table;
+            width: calc(100% - 17px) !important;  /* 减去滚动条宽度 */
+            table-layout: fixed !important;
+        }
+
+        .data-table thead tr {
+            display: table;
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+
+        .data-table tbody {
+            display: block;
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .data-table tbody tr {
+            display: table;
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+
+        /* 强制列宽 - 使用百分比让显示更均匀 */
+        .data-table thead th:nth-child(1),
+        .data-table tbody td:nth-child(1) { width: 5% !important; min-width: 50px !important; }
+        .data-table thead th:nth-child(2),
+        .data-table tbody td:nth-child(2) { width: 7% !important; min-width: 70px !important; }
+        .data-table thead th:nth-child(3),
+        .data-table tbody td:nth-child(3) { width: 22% !important; min-width: 150px !important; }
+        .data-table thead th:nth-child(4),
+        .data-table tbody td:nth-child(4) { width: 21% !important; min-width: 160px !important; }
+        .data-table thead th:nth-child(5),
+        .data-table tbody td:nth-child(5) { width: 10% !important; min-width: 90px !important; }
+        .data-table thead th:nth-child(6),
+        .data-table tbody td:nth-child(6) { width: 8% !important; min-width: 75px !important; }
+        .data-table thead th:nth-child(7),
+        .data-table tbody td:nth-child(7) { width: 8% !important; min-width: 75px !important; }
+        .data-table thead th:nth-child(8),
+        .data-table tbody td:nth-child(8) { width: 19% !important; min-width: 150px !important; }
+
+        /* 确保表头和表体样式一致 */
+        .data-table thead th,
+        .data-table tbody td {
+            padding: 10px 8px !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            border-bottom: 1px solid var(--border-light) !important;
+            word-wrap: break-word !important;
+            font-size: 13px !important;
+        }
+
+        /* 名称列居中对齐 */
+        .data-table tbody td:nth-child(3) {
+            text-align: center !important;
+        }
+
+        /* 料号列优化 */
+        .data-table tbody td:nth-child(4) {
+            font-size: 14px !important;
+            line-height: 1.3 !important;
         }
         
         /* 状态行样式 - 使用新配色 */
@@ -81,6 +160,8 @@
         .result-badge {
             display: inline-flex;
             align-items: center;
+            white-space: nowrap;
+            font-size: 11px !important;
             justify-content: center;
             gap: 4px;
             padding: 6px 14px;
@@ -235,11 +316,19 @@
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
         }
-        
-        .data-table thead, .data-table tbody tr {
+
+        .data-table thead {
             display: table;
             width: 100%;
             table-layout: fixed;
+        }
+
+        .data-table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            height: auto;
+            min-height: 50px;
         }
         
         .data-table tbody tr:hover {
@@ -280,6 +369,34 @@
     </style>
 </head>
 <body>
+
+<!-- 加载提示 -->
+<div id="pageLoading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,254,251,0.98);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#B8956B;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+    <p style="margin-top:20px;color:#718096;font-weight:600;font-size:14px;">正在加载组件...</p>
+    <p style="margin-top:8px;color:#a0aec0;font-size:12px;">首次加载可能需要几秒钟</p>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</div>
+
+<script>
+function checkLibraries() {
+    if (typeof XLSX !== 'undefined') {
+        const loading = document.getElementById('pageLoading');
+        if (loading) {
+            loading.style.opacity = '0';
+            loading.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => loading.remove(), 300);
+        }
+    } else {
+        setTimeout(checkLibraries, 100);
+    }
+}
+window.addEventListener('load', checkLibraries);
+</script>
 
 <div class="container">
     <div class="header">
@@ -408,14 +525,14 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th style="width:60px;">接插件行号</th>
-                        <th style="width:100px;">类别</th>
+                        <th>接插件行号</th>
+                        <th>类别</th>
                         <th class="c-name">物料名称</th>
-                        <th style="width:180px;">料号</th>
-                        <th style="width:90px;">硬件行号</th>
-                        <th style="width:80px;">接插件用量</th>
-                        <th style="width:80px;">硬件用量</th>
-                        <th style="width:140px;">核对结果</th>
+                        <th>料号</th>
+                        <th>硬件行号</th>
+                        <th>接插件用量</th>
+                        <th>硬件用量</th>
+                        <th>核对结果</th>
                     </tr>
                 </thead>
                 <tbody id="resultBody"></tbody>
@@ -428,18 +545,13 @@
 <script src="assets/js/common.js"></script>
 
 <script>
-    // 硬件BOM数据存储：料号 -> 行号数组（支持一个料号多行）
     let hwPnMap = new Map();
-    // 硬件BOM原始行数据（用于显示）
     let hwData = [];
-    // 接插件BOM工作簿
     let connWb = null;
-
-    // 检查库加载状态
     function checkLibrariesLoaded() {
         const xlsxLoaded = typeof XLSX !== 'undefined';
         const excelJsLoaded = typeof ExcelJS !== 'undefined';
-        
+
         if (xlsxLoaded && excelJsLoaded) {
             document.getElementById('loadingStatus').style.display = 'none';
             checkReady();
@@ -447,7 +559,7 @@
             const missing = [];
             if (!xlsxLoaded) missing.push('XLSX');
             if (!excelJsLoaded) missing.push('ExcelJS');
-            document.getElementById('loadingStatus').innerHTML = 
+            document.getElementById('loadingStatus').innerHTML =
                 `<span style="color:var(--accent-color);">
                     <span class="icon" style="display:inline-flex;vertical-align:middle;width:16px;height:16px;margin-right:4px;">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
@@ -460,7 +572,7 @@
             setTimeout(checkLibrariesLoaded, 500);
         }
     }
-    
+
     window.addEventListener('load', checkLibrariesLoaded);
 
     const categoryMapping = {
@@ -512,11 +624,8 @@
     document.getElementById('fileHardware').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) {
-            console.log('没有选择文件');
             return;
         }
-        
-        console.log('开始读取硬件BOM:', file.name);
         document.getElementById('hwName').innerText = "(" + file.name + ")";
         document.getElementById('hwLabel').classList.add('active-upload');
 
@@ -527,15 +636,12 @@
         const reader = new FileReader();
         reader.onload = (re) => {
             try {
-                console.log('文件读取成功，开始解析...');
                 const data = new Uint8Array(re.target.result);
                 const wb = XLSX.read(data, { type: 'array' });
                 const sheet = wb.Sheets[wb.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                
-                console.log('Excel解析完成，行数:', rows.length);
+
                 parseHardwareBOM(rows);
-                console.log('硬件BOM解析完成，hwPnMap.size:', hwPnMap.size);
                 checkReady();
             } catch (err) {
                 console.error('硬件BOM读取错误:', err);
@@ -563,20 +669,17 @@
             let pnCol = -1;
             let refDesCol = -1;
 
-            // 扫描前15行，查找同时包含"序号"、"料号"、"位号"、"物料描述"的表头行
             const scanRows = Math.min(15, rows.length);
             for (let i = 0; i < scanRows; i++) {
                 const row = rows[i];
                 if (!row || !Array.isArray(row)) continue;
-                
-                // 将当前行所有单元格转换为字符串并记录列索引
+
                 const cellTexts = [];
                 for (let j = 0; j < row.length; j++) {
                     const cellVal = row[j] !== undefined ? String(row[j]).trim() : '';
                     cellTexts.push({ col: j, text: cellVal });
                 }
-                
-                // 检查是否包含所有必需的关键字
+
                 const hasXuhao = cellTexts.some(c => c.text === '序号');
                 const hasLiaohao = cellTexts.some(c => c.text === '料号');
                 const hasWeihao = cellTexts.some(c => c.text === '位号');
@@ -584,24 +687,19 @@
                 
                 if (hasXuhao && hasLiaohao && hasWeihao && hasWuliao) {
                     headerRow = i;
-                    // 找到各列索引
                     pnCol = cellTexts.find(c => c.text === '料号').col;
                     refDesCol = cellTexts.find(c => c.text === '位号').col;
-                    console.log(`找到表头行: 第${headerRow + 1}行, 料号列: 第${pnCol + 1}列, 位号列: 第${refDesCol + 1}列`);
                     break;
                 }
             }
 
-            // 如果没找到表头，使用默认值
             if (headerRow < 0) {
                 headerRow = 8;
                 pnCol = 1;
                 refDesCol = 8;
-                console.log('未找到表头，使用默认设置');
             }
 
             const dataStartRow = headerRow + 1;
-            console.log(`硬件BOM解析: 表头在第${headerRow + 1}行, 料号在第${pnCol + 1}列, 位号在第${refDesCol + 1}列, 数据从第${dataStartRow + 1}行开始`);
 
             let lastValidQty = 0;
             let lastSequence = null;
@@ -616,17 +714,14 @@
                     if (!pn || pn.toLowerCase() === 'n/a') continue;
                     if (!/^HQ[0-9A-Z]/i.test(pn)) continue;
 
-                    // 计算位号数量
                     let desText = '';
                     if (refDesCol >= 0 && refDesCol < row.length && row[refDesCol] !== undefined) {
                         desText = String(row[refDesCol]).trim();
                     }
                     let count = desText ? desText.split(/[,，\s\n]+/).filter(v => v.trim().length > 0).length : 0;
-                    
-                    // 获取序号（假设在第1列）
+
                     const sequence = (row[0] !== undefined && row[0] !== null) ? String(row[0]).trim() : null;
-                    
-                    // 继承逻辑：处理替代料位号为空的情况（序号相同时继承主料位号数量）
+
                     if (count === 0 && lastValidQty > 0 && sequence !== null && sequence === lastSequence) {
                         count = lastValidQty;
                     }
@@ -655,8 +750,6 @@
                     console.warn(`解析第${i + 1}行时出错:`, rowErr);
                 }
             }
-
-            console.log(`硬件BOM解析完成: 共${hwData.length}条记录，${hwPnMap.size}个唯一料号`);
         } catch (err) {
             console.error('parseHardwareBOM 错误:', err);
             alert('解析硬件BOM时出错: ' + err.message);
@@ -666,7 +759,7 @@
     document.getElementById('fileConnector').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         document.getElementById('connName').innerText = "(" + file.name + ")";
         document.getElementById('connLabel').classList.add('active-upload');
 
@@ -676,7 +769,7 @@
                 const wb = new ExcelJS.Workbook();
                 await wb.xlsx.load(re.target.result);
                 connWb = wb;
-                
+
                 const sel = document.getElementById('sheetConnector');
                 sel.innerHTML = '';
                 wb.eachSheet(s => {
@@ -685,14 +778,29 @@
                     opt.text = s.name;
                     sel.appendChild(opt);
                 });
-                
+
                 if (wb.worksheets.length > 0) {
                     autoDetectColumns(wb.worksheets[0]);
                 }
+
                 checkReady();
             } catch (err) {
                 console.error('接插件BOM读取错误:', err);
-                alert('接插件BOM读取失败: ' + err.message);
+                const errorMsg = `接插件BOM读取失败！
+
+错误信息：${err.message}
+
+💡 解决方案：
+该文件可能包含特殊格式或已损坏。请尝试以下步骤：
+
+1. 在Excel中打开该文件
+2. 点击"文件" → "另存为"
+3. 选择"Excel工作簿(.xlsx)"格式
+4. 保存后重新上传
+
+这样可以清除文件中的特殊格式，使其兼容本工具。`;
+
+                alert(errorMsg);
             }
         };
         reader.onerror = () => {
@@ -706,7 +814,7 @@
         let nameCol = 3;
         let qtyCol = 8; // 默认第8列（H列）
         let foundPn = false, foundName = false, foundQty = false;
-        
+
         const nameKeywords = ['物料名称', '名称', 'description', 'desc', '物料描述', '品名', '规格'];
         const qtyKeywords = ['用量', '数量', '单耗', 'qty', 'quantity'];
 
@@ -714,14 +822,13 @@
             const row = sheet.getRow(i);
             row.eachCell((cell, colNumber) => {
                 const val = String(getCellValue(cell) || '').trim();
-                const lowerVal = val.toLowerCase().replace(/\s+/g, ''); // 去除所有空格
-                
-                // 排除干扰项（如"项目名称"这种包含"名称"但不是物料名称的表头）
+                const lowerVal = val.toLowerCase().replace(/\s+/g, '');
+
                 const excludeKeywords = ['项目名称', '负责人', '供应商名称'];
                 if (excludeKeywords.some(kw => lowerVal.includes(kw))) {
                     return;
                 }
-                
+
                 if (!foundName && nameKeywords.some(kw => lowerVal === kw || lowerVal.includes(kw))) {
                     nameCol = colNumber;
                     foundName = true;
@@ -738,7 +845,7 @@
         for (let i = 1; i <= Math.min(100, sheet.rowCount); i++) {
             const row = sheet.getRow(i);
             if (!row) continue;
-            for (let col = 1; col <= Math.min(15, row.cellCount || 15); col++) {
+            for (let col = 1; col <= Math.min(15, row.cellCount); col++) {
                 const cell = row.getCell(col);
                 const val = String(getCellValue(cell) || '').trim();
                 if (/^HQ[0-9A-Z]{5,}/i.test(val)) {
@@ -746,7 +853,7 @@
                 }
             }
         }
-        
+
         let maxCount = 0;
         colCounts.forEach((count, col) => {
             if (count > maxCount && count >= 2) {
@@ -755,12 +862,6 @@
                 foundPn = true;
             }
         });
-        
-        if (foundPn) {
-            console.log(`通过内容验证找到料号列: 第${pnCol}列(${getColName(pnCol)}列)，包含${maxCount}个料号`);
-        } else {
-            console.log(`使用默认料号列: 第${pnCol}列(${getColName(pnCol)}列)`);
-        }
 
         document.getElementById('colConnectorPn').value = pnCol;
         document.getElementById('colConnectorName').value = nameCol;
@@ -768,8 +869,6 @@
         document.getElementById('pnAutoTip').innerText = foundPn ? "已识别" : "";
         document.getElementById('nameAutoTip').innerText = foundName ? "已识别" : "";
         document.getElementById('qtyAutoTip').innerText = foundQty ? "已识别" : "";
-        
-        console.log(`接插件列检测: 料号列=${getColName(pnCol)}(${foundPn ? '自动' : '默认'}), 名称列=${getColName(nameCol)}(${foundName ? '自动' : '默认'}), 用量列=${getColName(qtyCol)}(${foundQty ? '自动' : '默认'})`);
     }
 
     document.getElementById('sheetConnector').onchange = function() {
@@ -782,9 +881,7 @@
         const b = document.getElementById('btnCheck');
         const xlsxLoaded = typeof XLSX !== 'undefined';
         const excelJsLoaded = typeof ExcelJS !== 'undefined';
-        
-        console.log('checkReady:', { xlsxLoaded, excelJsLoaded, hwPnMapSize: hwPnMap.size, connWb: !!connWb });
-        
+
         if (!xlsxLoaded || !excelJsLoaded) {
             b.disabled = true;
             b.innerHTML = `
@@ -797,7 +894,7 @@
                 正在加载组件...`;
             return;
         }
-        
+
         if (hwPnMap.size > 0 && connWb) {
             b.disabled = false;
             b.innerHTML = `
@@ -832,7 +929,7 @@
             } else {
                 b.innerHTML = `
                     <span class="icon icon-sm">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000">
                             <path d="M5 12H19" stroke="currentColor"/>
                             <path d="M12 5V19" stroke="currentColor"/>
                             <circle cx="12" cy="12" r="9" stroke="currentColor"/>
@@ -906,22 +1003,84 @@
 
         let results = [];
 
+        let matchedCount = 0;
+        let skippedCategory = 0;
+        let skippedPN = 0;
+        let lastCategory = '';
+        let mergedCells = new Map();
+
+        for (let row = 1; row <= sheet.rowCount; row++) {
+            const rowData = sheet.getRow(row);
+            if (!rowData) continue;
+            rowData.eachCell((cell, col) => {
+                if (cell.isMerged && cell.master) {
+                    const masterRow = cell.master.row;
+                    const masterCol = cell.master.col;
+                    const key = `${row}_${col}`;
+                    mergedCells.set(key, {
+                        row: masterRow,
+                        col: masterCol,
+                        value: getCellValue(cell.master)
+                    });
+                }
+            });
+        }
+
         sheet.eachRow((row, rowNum) => {
             const catCell = row.getCell(1);
-            const rawCatValue = getCellValue(catCell);
+            let rawCatValue = getCellValue(catCell);
 
-            if (!isCategoryMatch(rawCatValue, inputCat)) return;
+            const mergedKey = `${rowNum}_1`;
+            if (mergedCells.has(mergedKey)) {
+                rawCatValue = mergedCells.get(mergedKey).value;
+            }
+
+            let effectiveCategory = rawCatValue;
+            if (!effectiveCategory && lastCategory) {
+                effectiveCategory = lastCategory;
+            }
+
+            if (rawCatValue) {
+                lastCategory = rawCatValue;
+            }
 
             const pnCell = row.getCell(pnColNum);
-            const nameCell = row.getCell(nameColNum);
-            const qtyCell = row.getCell(qtyColNum);
-            const pn = getCellValue(pnCell);
+            let pn = getCellValue(pnCell);
 
-            if (!pn || pn.toLowerCase() === 'n/a') return;
+            const pnMergedKey = `${rowNum}_${pnColNum}`;
+            if (mergedCells.has(pnMergedKey)) {
+                pn = mergedCells.get(pnMergedKey).value;
+            }
+
+            const nameCell = row.getCell(nameColNum);
+            let name = getCellValue(nameCell);
+
+            const nameMergedKey = `${rowNum}_${nameColNum}`;
+            if (mergedCells.has(nameMergedKey)) {
+                name = mergedCells.get(nameMergedKey).value;
+            }
+
+            const qtyCell = row.getCell(qtyColNum);
+            let connQty = getCellValue(qtyCell);
+
+            const qtyMergedKey = `${rowNum}_${qtyColNum}`;
+            if (mergedCells.has(qtyMergedKey)) {
+                connQty = mergedCells.get(qtyMergedKey).value;
+            }
+
+            if (!isCategoryMatch(effectiveCategory, inputCat)) {
+                skippedCategory++;
+                return;
+            }
+
+            if (!pn || pn.toLowerCase() === 'n/a') {
+                skippedPN++;
+                return;
+            }
+
+            matchedCount++;
 
             const isStruck = hasStrikeThrough(catCell) || hasStrikeThrough(pnCell) || hasStrikeThrough(nameCell);
-
-            // 获取硬件BOM信息
             const hwInfoList = hwPnMap.get(pn);
             let hwRow = null;
             let hwQty = 0;
@@ -929,27 +1088,21 @@
                 hwRow = hwInfoList[0].rowNum;
                 hwQty = hwInfoList[0].qty;
             }
-            
-            // 获取接插件用量（处理合并单元格）
-            const masterQtyCell = qtyCell.master || qtyCell;
-            const connQty = parseFloat(getCellValue(masterQtyCell)) || 0;
-            
-            // 判断状态：有删除线时，检查硬件BOM是否存在该料号
+
             let status = 'pending';
             if (isStruck) {
-                // 有删除线：如果硬件中存在则为"多余"，否则为"已废弃"
                 status = (hwInfoList && hwInfoList.length > 0) ? 'extra' : 'ignored';
             }
-            
+
             results.push({
                 id: rowNum,
-                cat: rawCatValue,
-                name: getCellValue(nameCell),
+                cat: effectiveCategory,
+                name: name,
                 pn: pn,
                 hwRows: hwInfoList || null,
                 hwRow: hwRow,
                 hwQty: hwQty,
-                connQty: connQty,
+                connQty: (!isNaN(parseFloat(connQty)) && isFinite(connQty)) ? parseFloat(connQty) : 0,
                 st: status
             });
         });
@@ -959,8 +1112,6 @@
             return;
         }
 
-        console.log(`找到${results.length}条${inputCat}类别的记录`);
-
         checkSequenceAndQty(results);
         renderTable(results);
     };
@@ -968,7 +1119,6 @@
     function checkSequenceAndQty(results) {
         let i = 0;
         while (i < results.length) {
-            // 跳过已废弃和多余料号的行（这些不参与顺序检查）
             if (results[i].st === 'ignored' || results[i].st === 'extra') {
                 i++;
                 continue;
@@ -980,7 +1130,7 @@
             }
 
             const group = results.slice(i, j).filter(x => x.st !== 'ignored' && x.st !== 'extra');
-            
+
             if (group.length > 0) {
                 const hwRowNumbers = [];
                 group.forEach(item => {
@@ -1003,7 +1153,6 @@
                             current.item.st = 'seq';
                             current.item.expectedRow = expectedHwRow;
                         } else {
-                            // 顺序正确，检查数量
                             if (current.item.connQty !== current.item.hwQty) {
                                 current.item.st = 'qty';
                             } else {
@@ -1024,13 +1173,11 @@
         }
     }
 
-    // 性能优化：全局表格数据存储，用于虚拟滚动
     let tableDataCache = [];
     let tableStatsCache = {};
-    const BATCH_SIZE = 50; // 每批渲染行数
-    const VIRTUAL_SCROLL_THRESHOLD = 100; // 超过此数量启用虚拟滚动
-    
-    // 性能优化：创建表格行 HTML 字符串
+    const BATCH_SIZE = 50;
+    const VIRTUAL_SCROLL_THRESHOLD = 100;
+
     function createTableRowHTML(item) {
         let resultBadge = '';
         let rowClass = '';
@@ -1080,8 +1227,7 @@
             <td>${resultBadge}</td>
         </tr>`;
     }
-    
-    // 性能优化：统计结果计算
+
     function calculateStats(data) {
         let missingCount = 0, seqCount = 0, qtyCount = 0, ignoredCount = 0, extraCount = 0, okCount = 0;
         
@@ -1098,33 +1244,28 @@
         
         return { missingCount, seqCount, qtyCount, ignoredCount, extraCount, okCount };
     }
-    
-    // 性能优化：分批渲染表格
+
     function renderTableBatched(data, startIndex = 0) {
         const tbody = document.getElementById('resultBody');
         const endIndex = Math.min(startIndex + BATCH_SIZE, data.length);
-        
-        // 使用 DocumentFragment 批量插入
+
         const fragment = document.createDocumentFragment();
         const tempDiv = document.createElement('div');
-        
+
         for (let i = startIndex; i < endIndex; i++) {
             tempDiv.innerHTML = createTableRowHTML(data[i]);
             fragment.appendChild(tempDiv.firstElementChild);
         }
-        
+
         tbody.appendChild(fragment);
-        
-        // 如果还有更多数据，使用 requestAnimationFrame 继续渲染
+
         if (endIndex < data.length) {
             requestAnimationFrame(() => renderTableBatched(data, endIndex));
         } else {
-            // 渲染完成，更新统计信息
             updateSummary(tableStatsCache, data.length);
         }
     }
-    
-    // 性能优化：更新统计信息
+
     function updateSummary(stats, total) {
         const valid = total - stats.ignoredCount;
         document.getElementById('summaryText').innerHTML = 
@@ -1139,21 +1280,17 @@
     function renderTable(data) {
         const tbody = document.getElementById('resultBody');
         tbody.innerHTML = '';
-        
-        // 缓存数据
+
         tableDataCache = data;
         tableStatsCache = calculateStats(data);
-        
+
         document.getElementById('resultArea').style.display = 'block';
-        
-        // 小数据直接渲染，大数据分批渲染
+
         if (data.length <= VIRTUAL_SCROLL_THRESHOLD) {
-            // 小数据：直接一次性渲染
             const html = data.map(item => createTableRowHTML(item)).join('');
             tbody.innerHTML = html;
             updateSummary(tableStatsCache, data.length);
         } else {
-            // 大数据：分批渲染，避免阻塞主线程
             renderTableBatched(data, 0);
         }
     }

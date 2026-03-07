@@ -1,0 +1,490 @@
+/**
+ * BOM综合管理平台 - 位号查询工具特定样式
+ */
+
+/* ========================================
+   文件上传区域样式
+   ======================================== */
+.file-upload-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 180px;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
+    border: 2px dashed var(--border-dark);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.3s var(--ease-spring);
+    position: relative;
+}
+
+.file-upload-center:hover,
+.file-upload-center.dragover {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-soft) 0%, var(--bg-light) 100%);
+    transform: scale(1.01);
+}
+
+.file-upload-center svg {
+    width: 48px !important;
+    height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.file-upload-center input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    margin: 0;
+}
+
+.upload-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0;
+}
+
+.file-info-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--success-light);
+    border: 1px solid var(--success-color);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.file-info-custom svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0;
+}
+
+.file-structure-info {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--info-light);
+    border: 1px solid var(--info-color);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ========================================
+   按钮组布局
+   ======================================== */
+.d-flex {
+    display: flex;
+}
+
+.gap-2 {
+    gap: 12px;
+}
+
+.mt-3 {
+    margin-top: 16px;
+}
+
+.mb-2 {
+    margin-bottom: 12px;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+/* ========================================
+   主料/替代料颜色
+   ======================================== */
+.primary-material {
+    color: #7A9B76;
+    font-weight: 700;
+}
+
+.alternative-material {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* ========================================
+   自定义状态栏 - 液态玻璃
+   ======================================== */
+.status-bar-custom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 254, 251, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border-light);
+    padding: 12px 30px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    z-index: 100;
+    transition: all 0.3s var(--ease-smooth);
+}
+
+.status-bar-custom::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+}
+
+/* ========================================
+   带图标的表单控件
+   ======================================== */
+.form-control-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-light);
+    min-height: 48px;
+    padding: 0 16px;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    border: 1.5px solid var(--border-color);
+    border-right: none;
+    transition: all 0.25s var(--ease-smooth);
+}
+
+.form-control-with-icon svg {
+    color: var(--text-muted);
+    transition: color 0.25s var(--ease-smooth);
+    flex-shrink: 0;
+}
+
+.form-control-with-icon:focus-within {
+    background: white;
+    border-color: var(--primary-color);
+}
+
+.form-control-with-icon:focus-within svg {
+    color: var(--primary-color);
+}
+
+/* ========================================
+   料号输入行
+   ======================================== */
+.part-number-row {
+    animation: slideInRow 0.4s var(--ease-spring);
+}
+
+@keyframes slideInRow {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 输入组按钮优化 */
+.part-number-row .btn-add,
+.part-number-row .btn-remove {
+    padding: 12px;
+    transition: all 0.2s var(--ease-spring);
+}
+
+.part-number-row .btn-add:hover {
+    transform: scale(1.05);
+    background: var(--success-light);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.part-number-row .btn-remove:hover {
+    transform: scale(1.05);
+    background: var(--danger-light);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* 添加料号按钮 */
+#addPartBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1.5px dashed var(--border-dark);
+    color: var(--text-muted);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-spring);
+}
+
+#addPartBtn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-soft);
+    transform: translateY(-1px);
+}
+
+#addPartBtn svg {
+    transition: transform 0.3s var(--ease-spring);
+}
+
+#addPartBtn:hover svg {
+    transform: rotate(90deg);
+}
+
+/* ========================================
+   查询结果样式
+   ======================================== */
+.query-result-item {
+    background: rgba(255, 254, 251, 0.95);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    transition: all 0.3s var(--ease-spring);
+}
+
+.query-result-item:hover {
+    border-color: var(--primary-alpha-20);
+    box-shadow: var(--shadow-sm);
+    transform: translateX(4px);
+}
+
+.query-result-part {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--primary-dark);
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.query-result-designator {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.query-result-type {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.query-result-type.primary {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.query-result-type.alternative {
+    background: var(--primary-soft);
+    color: var(--primary-color);
+}
+
+/* ========================================
+   空状态
+   ======================================== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.empty-state-hint {
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* ========================================
+   高亮匹配
+   ======================================== */
+.highlight-match {
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FAF0E3 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    color: var(--accent-dark);
+}
+
+/* ========================================
+   结果详情样式
+   ======================================== */
+.result-details {
+    background: rgba(255, 254, 251, 0.95);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    transition: all 0.3s var(--ease-spring);
+}
+
+.result-details:hover {
+    border-color: var(--primary-alpha-20);
+    box-shadow: var(--shadow-sm);
+}
+
+.result-details h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.detail-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.detail-label {
+    min-width: 100px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.detail-value {
+    flex: 1;
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+.highlight {
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FAF0E3 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    color: var(--accent-dark);
+}
+
+/* ========================================
+   徽章样式
+   ======================================== */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.badge-success {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.badge-warning {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+/* ========================================
+   输入组样式
+   ======================================== */
+.input-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+
+.input-group .form-control {
+    flex: 1;
+}
+
+.input-group .btn {
+    border-radius: 0;
+}
+
+.input-group .btn:first-child {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.input-group .btn:last-child {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.input-group .btn:not(:first-child):not(:last-child) {
+    border-radius: 0;
+}
+
+/* ========================================
+   响应式优化
+   ======================================== */
+@media (max-width: 768px) {
+    .file-upload-center {
+        min-height: 140px;
+        padding: 30px 16px;
+    }
+
+    .file-upload-center svg {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .upload-text {
+        font-size: 14px;
+    }
+
+    .upload-hint {
+        font-size: 12px;
+    }
+
+    .d-flex {
+        flex-direction: column;
+    }
+
+    .gap-2 {
+        gap: 8px;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .detail-label {
+        min-width: auto;
+    }
+}
