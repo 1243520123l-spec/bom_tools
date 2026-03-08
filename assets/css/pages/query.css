@@ -116,15 +116,15 @@
 }
 
 /* ========================================
-   主料/替代料颜色
+   主料/替代料颜色 - Kawaii 柔和色
    ======================================== */
 .primary-material {
-    color: #7A9B76;
+    color: #68D391;
     font-weight: 700;
 }
 
 .alternative-material {
-    color: var(--primary-color);
+    color: var(--secondary-color);
     font-weight: 700;
 }
 

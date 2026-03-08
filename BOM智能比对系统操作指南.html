@@ -10,40 +10,40 @@
     
     <style>
         /* ========================================
-           文档容器 - Bento Grid 风格
+           文档容器 - Kawaii Bento Grid 风格
            ======================================== */
-        .doc-container { 
-            max-width: 900px; 
+        .doc-container {
+            max-width: 900px;
             margin: 0 auto;
             padding: 0 20px;
         }
-        
+
         /* ========================================
-           封面区块 - 液态玻璃 + 动画
+           封面区块 - Kawaii 彩虹渐变
            ======================================== */
         .cover-section {
             text-align: center;
-            padding: 80px 48px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 50%, var(--secondary-color) 100%);
+            padding: 85px 50px;
+            background: linear-gradient(135deg, #7ECEC0 0%, #7EB8DA 50%, #B5A8D8 100%);
             border-radius: var(--radius-2xl);
             color: white;
             margin-bottom: 40px;
-            box-shadow: var(--shadow-hover), 0 0 0 1px rgba(255,255,255,0.1) inset;
+            box-shadow: var(--shadow-lg), 0 0 0 2px rgba(255,255,255,0.15) inset;
             position: relative;
             overflow: hidden;
             transition: all 0.5s var(--ease-spring);
         }
-        
+
         .cover-section::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: 
-                radial-gradient(ellipse 80% 50% at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 50%),
-                radial-gradient(ellipse 60% 40% at 80% 70%, rgba(255,255,255,0.1) 0%, transparent 40%);
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 30%, rgba(255,255,255,0.18) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 70%, rgba(255,255,255,0.12) 0%, transparent 40%);
             pointer-events: none;
         }
-        
+
         .cover-section::after {
             content: '';
             position: absolute;
@@ -51,217 +51,224 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 50%);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 50%);
             animation: shimmer 8s ease-in-out infinite;
         }
-        
+
         @keyframes shimmer {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             50% { transform: translate(-3%, -3%) rotate(3deg); }
         }
-        
-        .cover-section .icon { 
-            width: 56px; 
-            height: 56px; 
-            margin-bottom: 16px; 
-            opacity: 0.95; 
+
+        .cover-section .icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 18px;
+            opacity: 0.95;
             fill: currentColor;
-            animation: float 4s ease-in-out infinite;
+            animation: kawaiiFloat 4s ease-in-out infinite;
             position: relative;
             z-index: 1;
-            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+            filter: drop-shadow(0 6px 16px rgba(0,0,0,0.15));
         }
-        
-        .cover-section h1 { 
-            font-size: 2rem; 
-            font-weight: 700; 
-            margin-bottom: 12px; 
+
+        @keyframes kawaiiFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .cover-section h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 14px;
             letter-spacing: -0.02em;
             position: relative;
             z-index: 1;
-            text-shadow: 0 2px 16px rgba(0,0,0,0.15);
+            text-shadow: 0 3px 16px rgba(0,0,0,0.15);
             line-height: 1.25;
         }
-        
-        .cover-section .subtitle { 
-            font-size: 1rem; 
-            opacity: 0.92; 
-            margin-bottom: 20px;
+
+        .cover-section .subtitle {
+            font-size: 1rem;
+            opacity: 0.92;
+            margin-bottom: 22px;
             position: relative;
             z-index: 1;
             font-weight: 500;
             letter-spacing: 0.01em;
         }
-        
-        .cover-info { 
-            margin-top: 0; 
-            padding-top: 0; 
+
+        .cover-info {
+            margin-top: 0;
+            padding-top: 0;
             border-top: none;
             font-size: 0.9rem;
             position: relative;
             z-index: 1;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             border-radius: var(--radius-full);
-            background: rgba(255,255,255,0.1);
-            padding: 12px 28px;
+            background: rgba(255,255,255,0.15);
+            padding: 14px 30px;
             display: inline-flex;
-            gap: 32px;
+            gap: 35px;
         }
-        
+
         .cover-info p { margin: 0; }
-        
+
         /* ========================================
-           目录区块 - Bento Grid + 液态玻璃
+           目录区块 - Kawaii 柔和卡片
            ======================================== */
         .toc-section {
             background: var(--card-bg);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            padding: 40px;
+            padding: 42px;
             border-radius: var(--radius-2xl);
             box-shadow: var(--card-shadow);
             margin-bottom: 40px;
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             position: relative;
             overflow: hidden;
         }
-        
+
         .toc-section::before {
             content: '';
             position: absolute;
             inset: 0;
             border-radius: inherit;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%);
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(126, 206, 192, 0.2) 0%, rgba(126, 184, 218, 0.15) 50%, rgba(181, 168, 216, 0.1) 100%);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
         }
-        
-        .toc-section h2 { 
-            color: var(--primary-color); 
+
+        .toc-section h2 {
+            color: var(--primary-color);
             border-bottom: none;
             padding-bottom: 0;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
             font-size: 1.5rem;
             font-weight: 700;
             letter-spacing: -0.01em;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
         }
-        
+
         .toc-section h2::before {
             content: '';
             width: 4px;
-            height: 24px;
-            background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            height: 26px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 2px;
         }
-        
+
         .toc-item {
             display: flex;
             align-items: center;
-            padding: 16px 20px;
-            border-radius: var(--radius-lg);
-            transition: all 0.35s var(--ease-spring);
+            padding: 18px 22px;
+            border-radius: var(--radius-xl);
+            transition: all 0.35s var(--ease-bounce);
             cursor: pointer;
             background: transparent;
-            border: 1px solid transparent;
-            margin-bottom: 8px;
+            border: 2px solid transparent;
+            margin-bottom: 10px;
         }
-        
-        .toc-item:hover { 
-            background: var(--primary-alpha-10);
-            padding-left: 28px;
+
+        .toc-item:hover {
+            background: var(--primary-soft);
+            padding-left: 30px;
             border-color: var(--card-border-strong);
-            transform: translateX(4px);
+            transform: translateX(6px);
             box-shadow: var(--shadow-sm);
         }
-        
-        .toc-number { 
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+
+        .toc-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             font-size: 0.95rem;
             font-weight: 700;
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 16px;
+            margin-right: 18px;
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(184, 149, 107, 0.3);
+            box-shadow: 0 4px 12px rgba(126, 206, 192, 0.35);
         }
-        
+
         .toc-text {
             font-size: 1.05rem;
             color: var(--text-primary);
             font-weight: 500;
         }
-        
+
         /* ========================================
-           内容区块 - 液态玻璃卡片
+           内容区块 - Kawaii 柔和卡片
            ======================================== */
         .content-section {
             background: var(--card-bg);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            padding: 40px;
+            padding: 42px;
             border-radius: var(--radius-2xl);
             box-shadow: var(--card-shadow);
             margin-bottom: 32px;
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             position: relative;
             transition: all 0.4s var(--ease-spring);
         }
-        
+
         .content-section::before {
             content: '';
             position: absolute;
             inset: 0;
             border-radius: inherit;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%);
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(126, 206, 192, 0.15) 0%, rgba(181, 168, 216, 0.1) 100%);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
         }
-        
+
         .content-section:hover {
             box-shadow: var(--card-shadow-hover);
             border-color: var(--card-border-strong);
         }
-        
-        .content-section h2 { 
-            color: var(--text-primary); 
+
+        .content-section h2 {
+            color: var(--text-primary);
             border-bottom: none;
             padding-bottom: 0;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
             font-size: 1.6rem;
             font-weight: 700;
             letter-spacing: -0.01em;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
         }
-        
+
         .content-section h2::before {
             content: '';
             width: 4px;
-            height: 28px;
-            background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            height: 30px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 2px;
         }
-        
-        .content-section h3 { 
-            color: var(--text-primary); 
-            margin: 32px 0 20px 0; 
+
+        .content-section h3 {
+            color: var(--text-primary);
+            margin: 32px 0 22px 0;
             padding-left: 0;
             border-left: none;
             font-size: 1.25rem;
@@ -270,449 +277,423 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .content-section h3::before {
             content: '';
-            width: 8px;
-            height: 8px;
-            background: var(--accent-color);
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 50%;
         }
-        
-        .content-section h4 { 
-            color: var(--text-secondary); 
-            margin: 24px 0 16px 0; 
+
+        .content-section h4 {
+            color: var(--text-secondary);
+            margin: 24px 0 16px 0;
             font-size: 1.1rem;
             font-weight: 600;
         }
-        
+
         /* ========================================
-           步骤卡片 - 弹簧物理动画
+           步骤卡片 - Kawaii 弹跳动画
            ======================================== */
         .step-card {
-            background: linear-gradient(135deg, var(--bg-light) 0%, rgba(255,254,251,0.8) 100%);
+            background: linear-gradient(135deg, var(--primary-soft) 0%, rgba(126, 184, 218, 0.05) 100%);
             border-radius: var(--radius-xl);
-            padding: 28px;
+            padding: 30px;
             margin: 24px 0;
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             box-shadow: var(--shadow-sm);
-            transition: all 0.4s var(--ease-spring);
+            transition: all 0.35s var(--ease-bounce);
             position: relative;
             overflow: hidden;
         }
-        
+
         .step-card::before {
             content: '';
             position: absolute;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
-            border-radius: 2px 0 0 2px;
+            width: 5px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 3px 0 0 3px;
         }
-        
+
         .step-card:hover {
-            transform: translateY(-4px) scale(1.005);
+            transform: translateY(-5px) scale(1.01);
             box-shadow: var(--shadow-md);
             border-color: var(--card-border-strong);
         }
-        
-        .step-header { 
-            display: flex; 
-            align-items: center; 
-            margin-bottom: 16px;
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
         }
-        
+
         .step-number {
-            width: 44px; 
-            height: 44px; 
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
-            border-radius: var(--radius-md); 
-            display: flex; 
-            align-items: center; 
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
             justify-content: center;
-            font-weight: 700; 
-            font-size: 1.2rem; 
-            margin-right: 16px; 
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 18px;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(184, 149, 107, 0.35);
-            transition: all 0.3s var(--ease-spring);
+            box-shadow: 0 6px 16px rgba(126, 206, 192, 0.4);
+            transition: all 0.35s var(--ease-bounce);
         }
-        
+
         .step-card:hover .step-number {
-            transform: scale(1.1) rotate(-3deg);
-            box-shadow: 0 6px 16px rgba(184, 149, 107, 0.45);
+            transform: scale(1.12) rotate(-5deg);
+            box-shadow: 0 8px 20px rgba(126, 206, 192, 0.5);
         }
-        
-        .step-title { 
-            font-size: 1.15rem; 
-            font-weight: 600; 
+
+        .step-title {
+            font-size: 1.15rem;
+            font-weight: 600;
             color: var(--text-primary);
             letter-spacing: -0.01em;
         }
-        
+
         /* ========================================
-           提示框 - 液态玻璃效果
+           提示框 - Kawaii 柔和效果
            ======================================== */
         .tip-box {
-            background: linear-gradient(135deg, rgba(122, 139, 155, 0.08) 0%, rgba(240, 245, 247, 0.6) 100%);
-            border: 1px solid rgba(122, 139, 155, 0.2);
-            border-left: 4px solid var(--info-color);
-            padding: 20px 24px;
-            margin: 24px 0; 
-            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(126, 206, 192, 0.08) 0%, rgba(232, 246, 242, 0.6) 100%);
+            border: 2px solid rgba(126, 206, 192, 0.2);
+            border-left: 5px solid var(--primary-color);
+            padding: 22px 26px;
+            margin: 24px 0;
+            border-radius: var(--radius-xl);
             backdrop-filter: blur(12px);
             position: relative;
-            transition: all 0.35s var(--ease-spring);
+            transition: all 0.35s var(--ease-bounce);
         }
-        
+
         .tip-box:hover {
-            transform: translateX(4px);
+            transform: translateX(5px);
             box-shadow: var(--shadow-sm);
-            border-color: rgba(122, 139, 155, 0.35);
+            border-color: rgba(126, 206, 192, 0.35);
         }
-        
-        .tip-box::before { 
-            content: "提示"; 
-            display: block; 
-            font-weight: 700; 
-            color: var(--info-color); 
-            margin-bottom: 10px;
+
+        .tip-box::before {
+            content: "💡 提示";
+            display: block;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 12px;
             font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
-        .tip-box::after {
-            content: '';
-            width: 16px;
-            height: 16px;
-            background: var(--info-color);
-            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E") no-repeat center;
-            mask-size: contain;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            opacity: 0.3;
-        }
-        
+
         /* ========================================
-           警告框 - 液态玻璃效果
+           警告框 - Kawaii 柔和效果
            ======================================== */
         .warning-box {
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.08) 0%, rgba(253, 240, 226, 0.6) 100%);
-            border: 1px solid rgba(212, 165, 116, 0.25);
-            border-left: 4px solid var(--warning-color);
-            padding: 20px 24px;
-            margin: 24px 0; 
-            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(246, 173, 85, 0.08) 0%, rgba(254, 235, 200, 0.6) 100%);
+            border: 2px solid rgba(246, 173, 85, 0.25);
+            border-left: 5px solid var(--warning-color);
+            padding: 22px 26px;
+            margin: 24px 0;
+            border-radius: var(--radius-xl);
             backdrop-filter: blur(12px);
             position: relative;
-            transition: all 0.35s var(--ease-spring);
+            transition: all 0.35s var(--ease-bounce);
         }
-        
+
         .warning-box:hover {
-            transform: translateX(4px);
+            transform: translateX(5px);
             box-shadow: var(--shadow-sm);
-            border-color: rgba(212, 165, 116, 0.4);
+            border-color: rgba(246, 173, 85, 0.4);
         }
-        
-        .warning-box::before { 
-            content: "重要"; 
-            display: block; 
-            font-weight: 700; 
-            color: var(--accent-dark); 
-            margin-bottom: 10px;
+
+        .warning-box::before {
+            content: "⚠️ 重要";
+            display: block;
+            font-weight: 700;
+            color: var(--warning-color);
+            margin-bottom: 12px;
             font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
-        .warning-box::after {
-            content: '';
-            width: 18px;
-            height: 18px;
-            background: var(--warning-color);
-            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'/%3E%3C/svg%3E") no-repeat center;
-            mask-size: contain;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            opacity: 0.3;
-        }
-        
+
         /* ========================================
-           状态网格
+           状态网格 - Kawaii 圆润卡片
            ======================================== */
-        .status-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 16px; 
-            margin: 24px 0; 
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin: 24px 0;
         }
-        
-        .status-item { 
-            display: flex; 
-            align-items: flex-start; 
-            padding: 20px; 
-            background: var(--bg-light);
-            border-radius: var(--radius-lg); 
-            border: 1px solid var(--border-light);
-            transition: all 0.35s var(--ease-spring);
+
+        .status-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 22px;
+            background: linear-gradient(135deg, var(--bg-light) 0%, rgba(126, 206, 192, 0.03) 100%);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--card-border);
+            transition: all 0.35s var(--ease-bounce);
         }
-        
+
         .status-item:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px) scale(1.01);
             box-shadow: var(--shadow-sm);
             border-color: var(--card-border-strong);
             background: white;
         }
-        
-        .status-item svg { 
-            width: 22px; 
-            height: 22px; 
-            margin-right: 14px; 
-            margin-top: 2px; 
+
+        .status-item svg {
+            width: 24px;
+            height: 24px;
+            margin-right: 16px;
+            margin-top: 2px;
             flex-shrink: 0;
-            transition: transform 0.3s var(--ease-spring);
+            transition: transform 0.35s var(--ease-bounce);
         }
-        
+
         .status-item:hover svg {
-            transform: scale(1.15);
+            transform: scale(1.18) rotate(5deg);
         }
-        
-        .status-content h4 { 
-            margin: 0 0 6px 0; 
+
+        .status-content h4 {
+            margin: 0 0 8px 0;
             font-size: 0.95rem;
             font-weight: 600;
             color: var(--text-primary);
         }
-        
-        .status-content p { 
-            margin: 0; 
-            font-size: 0.85rem; 
+
+        .status-content p {
+            margin: 0;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
-        
+
         /* ========================================
-           Q&A 项目
+           Q&A 项目 - Kawaii 问答卡片
            ======================================== */
-        .qa-item { 
-            margin: 24px 0; 
-            padding: 24px; 
-            background: var(--bg-light);
-            border-radius: var(--radius-xl); 
-            border: 1px solid var(--border-light);
-            transition: all 0.35s var(--ease-spring);
+        .qa-item {
+            margin: 24px 0;
+            padding: 26px;
+            background: linear-gradient(135deg, var(--bg-light) 0%, rgba(126, 206, 192, 0.03) 100%);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--card-border);
+            transition: all 0.35s var(--ease-bounce);
         }
-        
+
         .qa-item:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px) scale(1.01);
             box-shadow: var(--shadow-sm);
             border-color: var(--card-border-strong);
         }
-        
-        .qa-question { 
-            font-weight: 700; 
-            color: var(--primary-color); 
-            font-size: 1.05rem; 
-            margin-bottom: 12px;
+
+        .qa-question {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
-        
+
         .qa-question::before {
             content: 'Q';
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
-            border-radius: 6px;
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 700;
             flex-shrink: 0;
         }
-        
-        .qa-answer { 
-            padding-left: 34px;
+
+        .qa-answer {
+            padding-left: 40px;
             color: var(--text-secondary);
         }
-        
+
         /* ========================================
-           流程图 - Bento 风格
+           流程图 - Kawaii Bento 风格
            ======================================== */
         .flowchart {
-            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-color) 100%);
-            border-radius: var(--radius-xl); 
-            padding: 40px; 
+            background: linear-gradient(135deg, var(--primary-soft) 0%, rgba(126, 184, 218, 0.05) 100%);
+            border-radius: var(--radius-2xl);
+            padding: 45px;
             margin: 24px 0;
             text-align: center;
-            border: 1px solid var(--border-light);
+            border: 2px solid var(--card-border);
             position: relative;
         }
-        
+
         .flowchart::before {
             content: '';
             position: absolute;
             inset: 0;
             border-radius: inherit;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(184, 149, 107, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, rgba(212, 165, 116, 0.05) 0%, transparent 40%);
+            background:
+                radial-gradient(circle at 20% 20%, rgba(126, 206, 192, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(126, 184, 218, 0.06) 0%, transparent 40%);
             pointer-events: none;
         }
-        
+
         .flow-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             background: white;
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg); 
-            padding: 16px 32px; 
-            margin: 8px 0; 
-            font-weight: 600; 
+            border: 2px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            padding: 18px 36px;
+            margin: 10px 0;
+            font-weight: 600;
             color: var(--text-primary);
             box-shadow: var(--shadow-sm);
-            transition: all 0.35s var(--ease-spring);
+            transition: all 0.35s var(--ease-bounce);
             position: relative;
             z-index: 1;
-            min-width: 200px;
+            min-width: 210px;
         }
-        
+
         .flow-box:hover {
-            transform: translateY(-3px) scale(1.02);
+            transform: translateY(-4px) scale(1.03);
             box-shadow: var(--shadow-md);
-            border-color: var(--primary-light);
+            border-color: var(--primary-color);
         }
-        
-        .flow-arrow { 
-            color: var(--primary-color); 
-            font-size: 1.5rem; 
-            margin: 8px 0;
+
+        .flow-arrow {
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            margin: 10px 0;
             opacity: 0.6;
             animation: pulse 2s ease-in-out infinite;
         }
-        
+
         /* ========================================
-           页脚
+           页脚 - Kawaii 柔和风格
            ======================================== */
-        .footer-section { 
-            text-align: center; 
-            padding: 48px 40px; 
+        .footer-section {
+            text-align: center;
+            padding: 52px 42px;
             color: var(--text-muted);
             background: var(--card-bg);
             backdrop-filter: blur(20px);
-            border-radius: var(--radius-xl);
-            border: 1px solid var(--card-border);
-            margin-top: 20px;
+            border-radius: var(--radius-2xl);
+            border: 2px solid var(--card-border);
+            margin-top: 24px;
         }
-        
+
         .footer-section p {
             margin: 0;
         }
-        
+
         .footer-section p:last-child {
-            margin-top: 12px;
+            margin-top: 14px;
             font-size: 0.9rem;
             opacity: 0.8;
         }
-        
+
         /* ========================================
-           返回按钮
+           返回按钮 - Kawaii 胶囊形
            ======================================== */
-        .back-btn { 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
-            margin-bottom: 20px;
-            padding: 10px 20px;
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 22px;
+            padding: 12px 24px;
             border-radius: var(--radius-full);
             font-size: 0.9rem;
             font-weight: 600;
         }
-        
-        .back-btn svg { 
-            width: 16px; 
-            height: 16px; 
+
+        .back-btn svg {
+            width: 18px;
+            height: 18px;
             fill: currentColor;
-            transition: transform 0.3s var(--ease-spring);
+            transition: transform 0.35s var(--ease-bounce);
         }
-        
+
         .back-btn:hover svg {
-            transform: translateX(-3px);
+            transform: translateX(-4px);
         }
-        
+
         /* ========================================
-           返回顶部按钮
+           返回顶部按钮 - Kawaii 圆润
            ======================================== */
         .back-to-top {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
+            bottom: 35px;
+            right: 35px;
+            width: 55px;
+            height: 55px;
             background: var(--card-bg);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             box-shadow: var(--shadow-md);
-            transition: all 0.3s var(--ease-spring);
+            transition: all 0.35s var(--ease-bounce);
             opacity: 0;
             visibility: hidden;
             z-index: 999;
         }
-        
+
         .back-to-top.visible {
             opacity: 1;
             visibility: visible;
         }
-        
+
         .back-to-top:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px) scale(1.05);
             box-shadow: var(--shadow-lg);
-            border-color: var(--primary-light);
+            border-color: var(--primary-color);
         }
-        
+
         .back-to-top svg {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             fill: var(--primary-color);
         }
-        
+
         /* ========================================
-           响应式优化
+           响应式优化 - Kawaii 适配
            ======================================== */
         @media (max-width: 992px) {
             .status-grid { grid-template-columns: 1fr; }
-            .cover-section { padding: 60px 32px; }
+            .cover-section { padding: 65px 35px; }
             .cover-section h1 { font-size: 2rem; }
-            .content-section, .toc-section { padding: 28px; }
-            .cover-info { flex-direction: column; gap: 12px; }
+            .content-section, .toc-section { padding: 30px; }
+            .cover-info { flex-direction: column; gap: 14px; }
         }
-        
+
         @media (max-width: 768px) {
-            .doc-container { padding: 0 16px; }
-            .cover-section { padding: 48px 24px; border-radius: var(--radius-xl); }
-            .cover-section h1 { font-size: 1.6rem; }
-            .cover-section .icon { width: 64px; height: 64px; }
-            .content-section, .toc-section { padding: 24px; border-radius: var(--radius-xl); }
-            .step-card { padding: 20px; }
-            .flowchart { padding: 28px 20px; }
-            .flow-box { min-width: 160px; padding: 14px 24px; }
-            .qa-answer { padding-left: 0; padding-top: 12px; }
+            .doc-container { padding: 0 18px; }
+            .cover-section { padding: 50px 26px; border-radius: var(--radius-xl); }
+            .cover-section h1 { font-size: 1.65rem; }
+            .cover-section .icon { width: 68px; height: 68px; }
+            .content-section, .toc-section { padding: 26px; border-radius: var(--radius-xl); }
+            .step-card { padding: 22px; }
+            .flowchart { padding: 30px 22px; }
+            .flow-box { min-width: 170px; padding: 16px 28px; }
+            .qa-answer { padding-left: 0; padding-top: 14px; }
         }
     </style>
 </head>
