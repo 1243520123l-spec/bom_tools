@@ -21,6 +21,7 @@
       --line: rgba(126, 206, 192, 0.2);
       --shadow: 0 12px 32px rgba(126, 206, 192, 0.18);
       --shadow-strong: 0 16px 48px rgba(126, 206, 192, 0.26);
+      --table-header-height: 52px;
       --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -270,9 +271,13 @@
     }
 
     .section-row td {
+      position: sticky;
+      top: var(--table-header-height);
+      z-index: 1;
       background: linear-gradient(135deg, var(--sky-soft) 0%, var(--lavender-soft) 100%);
       color: var(--text);
       font-weight: 800;
+      box-shadow: 0 8px 18px rgba(126, 206, 192, 0.12);
     }
 
 
@@ -485,6 +490,10 @@
 
       table.append(thead, tbody);
       tableWrapEl.appendChild(table);
+      requestAnimationFrame(() => {
+        const headerHeight = thead.getBoundingClientRect().height;
+        tableWrapEl.style.setProperty("--table-header-height", `${Math.ceil(headerHeight)}px`);
+      });
       fileNameEl.textContent = state.fileName;
       activeSheetEl.textContent = state.activeSheet;
     }
