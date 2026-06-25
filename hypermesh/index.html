@@ -88,7 +88,7 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 330px) auto;
       gap: 18px;
       align-items: center;
     }
@@ -132,84 +132,51 @@
       white-space: nowrap;
     }
 
-    .toolbar {
+    .module-select-wrap {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 18px;
-      align-items: center;
-      margin: 18px 0 0;
-      padding: 18px;
-      border: 2px solid rgba(126, 206, 192, 0.12);
-      border-radius: 30px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
+      gap: 8px;
+      align-self: center;
     }
 
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    .module-label {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .tab {
-      min-height: 42px;
-      padding: 10px 18px;
+    .module-select {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 44px 0 18px;
       border: 2px solid rgba(126, 206, 192, 0.18);
       border-radius: 9999px;
-      background: #fffefc;
-      color: #4a5568;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 253, 250, 0.94) 100%);
+      box-shadow: 0 8px 24px rgba(126, 206, 192, 0.22);
+      color: var(--text);
       cursor: pointer;
       font: inherit;
       font-size: 14px;
-      font-weight: 700;
-      transition:
-        transform 220ms var(--ease-spring),
-        box-shadow 220ms var(--ease-smooth),
-        background 220ms var(--ease-smooth),
-        color 220ms var(--ease-smooth);
-    }
-
-    .tab:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 10px 24px rgba(126, 206, 192, 0.22);
-    }
-
-    .tab.active {
-      border-color: transparent;
-      background: linear-gradient(135deg, var(--mint) 0%, var(--sky) 100%);
-      color: #ffffff;
-      box-shadow: 0 8px 22px rgba(126, 206, 192, 0.36);
-    }
-
-    .file-picker {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      padding: 0 20px;
-      overflow: hidden;
-      border-radius: 9999px;
-      background: linear-gradient(135deg, var(--mint) 0%, var(--sky) 100%);
-      box-shadow: 0 4px 16px rgba(126, 206, 192, 0.35);
-      color: #ffffff;
-      font-size: 14px;
       font-weight: 800;
-      cursor: pointer;
-      transition: transform 220ms var(--ease-spring), box-shadow 220ms var(--ease-smooth);
+      outline: none;
+      appearance: none;
+      transition: box-shadow 180ms var(--ease-smooth), transform 180ms var(--ease-spring);
     }
 
-    .file-picker:hover {
-      transform: translateY(-4px) scale(1.03);
-      box-shadow: 0 12px 28px rgba(126, 206, 192, 0.32);
+    .module-select-wrap::after {
+      align-self: end;
+      justify-self: end;
+      margin: 0 18px 16px 0;
+      content: "⌄";
+      color: var(--mint-dark);
+      font-size: 18px;
+      font-weight: 900;
+      pointer-events: none;
     }
 
-    .file-picker input {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
+    .module-select:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 4px rgba(126, 206, 192, 0.18), 0 10px 26px rgba(126, 206, 192, 0.24);
     }
 
 
@@ -319,7 +286,7 @@
       }
 
       .hero-content,
-      .toolbar {
+      .module-select-wrap {
         grid-template-columns: 1fr;
       }
 
@@ -331,20 +298,6 @@
         max-height: none;
       }
 
-      .toolbar {
-        margin-top: 16px;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .tab,
-      .file-picker {
-        width: 100%;
-      }
-
-      .tabs {
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -354,7 +307,11 @@
       <div class="hero-content">
         <div>
           <h1>HyperMesh 仿真建模规范</h1>
-          <p class="subtitle">按模块查看建模命名、单元类型、材料与基础单元尺寸。页面内容来自 Excel，替换或重新选择 Excel 后即可更新展示。</p>
+          <p class="subtitle">按模块查看建模命名、单元类型、材料与基础单元尺寸。页面内容来自同目录 Excel，更新 Excel 后即可同步展示。</p>
+        </div>
+        <div class="module-select-wrap">
+          <label class="module-label" for="moduleSelect">模块选择</label>
+          <select class="module-select" id="moduleSelect" aria-label="选择建模规范模块"></select>
         </div>
         <div class="hero-meta">
           <span class="meta-label">当前 Excel</span>
@@ -370,28 +327,19 @@
         <div class="message">正在读取同目录 Excel...</div>
       </div>
     </section>
-
-    <section class="toolbar" aria-label="模块切换与文件选择">
-      <nav class="tabs" id="tabs" aria-label="Sheet 模块"></nav>
-      <label class="file-picker">
-        选择 Excel
-        <input id="fileInput" type="file" accept=".xlsx,.xls">
-      </label>
-    </section>
   </main>
 
   <script>
-    const DEFAULT_EXCEL = "仿真建模规范-手机.xlsx";
+    const EXCEL_MANIFEST = "excel-files.json";
     const state = {
       workbook: null,
       sheets: [],
       activeSheet: "",
-      fileName: DEFAULT_EXCEL
+      fileName: ""
     };
 
-    const tabsEl = document.getElementById("tabs");
+    const moduleSelectEl = document.getElementById("moduleSelect");
     const tableWrapEl = document.getElementById("tableWrap");
-    const fileInputEl = document.getElementById("fileInput");
     const fileNameEl = document.getElementById("fileName");
     const activeSheetEl = document.getElementById("activeSheet");
 
@@ -427,19 +375,14 @@
       return text.includes("规范") || text.includes("部件") || text.includes("简化版") || text.includes("详细版") || text.startsWith("注：") || text.includes("名称全部");
     }
 
-    function renderTabs() {
-      tabsEl.innerHTML = "";
+    function renderModuleSelect() {
+      moduleSelectEl.innerHTML = "";
       state.sheets.forEach((sheetName) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `tab${sheetName === state.activeSheet ? " active" : ""}`;
-        button.textContent = sheetName;
-        button.addEventListener("click", () => {
-          state.activeSheet = sheetName;
-          renderTabs();
-          renderTable();
-        });
-        tabsEl.appendChild(button);
+        const option = document.createElement("option");
+        option.value = sheetName;
+        option.textContent = sheetName;
+        option.selected = sheetName === state.activeSheet;
+        moduleSelectEl.appendChild(option);
       });
     }
 
@@ -508,32 +451,36 @@
         setMessage("Excel 中未找到任何 sheet。", true);
         return;
       }
-      renderTabs();
+      renderModuleSelect();
       renderTable();
+    }
+
+    async function getDefaultExcelFile() {
+      const response = await fetch(EXCEL_MANIFEST, { cache: "no-store" });
+      if (!response.ok) throw new Error(`manifest HTTP ${response.status}`);
+      const files = await response.json();
+      if (!Array.isArray(files) || files.length === 0) {
+        throw new Error("manifest is empty");
+      }
+      return files.find((fileName) => /\.xlsx?$/i.test(fileName)) || files[0];
     }
 
     async function loadDefaultWorkbook() {
       try {
-        const response = await fetch(DEFAULT_EXCEL, { cache: "no-store" });
+        const excelFile = await getDefaultExcelFile();
+        const response = await fetch(encodeURI(excelFile), { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const buffer = await response.arrayBuffer();
-        loadWorkbookFromArrayBuffer(buffer, DEFAULT_EXCEL);
+        loadWorkbookFromArrayBuffer(buffer, excelFile);
       } catch (error) {
         console.error(error);
-        setMessage("未能自动读取同目录 Excel。请通过本地 HTTP 服务打开本页，或点击“选择 Excel”手动载入文件。", true);
+        setMessage("未能自动读取同目录第一个 Excel。请确认 excel-files.json 已列出 Excel 文件，并通过本地 HTTP 服务打开本页。", true);
       }
     }
 
-    fileInputEl.addEventListener("change", async (event) => {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-      try {
-        const buffer = await file.arrayBuffer();
-        loadWorkbookFromArrayBuffer(buffer, file.name);
-      } catch (error) {
-        console.error(error);
-        setMessage("Excel 读取失败，请确认文件格式为 .xlsx 或 .xls。", true);
-      }
+    moduleSelectEl.addEventListener("change", (event) => {
+      state.activeSheet = event.target.value;
+      renderTable();
     });
 
     loadDefaultWorkbook();
