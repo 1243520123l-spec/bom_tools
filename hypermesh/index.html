@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HyperMesh 结构建模规范</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --mint: #7ecec0;
+      --mint-light: #e8f6f2;
+      --mint-dark: #5ebba9;
+      --sky: #7eb8da;
+      --sky-soft: #e5f2fa;
+      --lavender: #b5a8d8;
+      --lavender-soft: #f0edf8;
+      --page: #fdfdfb;
+      --panel: rgba(255, 254, 252, 0.94);
+      --text: #2d3748;
+      --muted: #718096;
+      --line: rgba(126, 206, 192, 0.2);
+      --shadow: 0 12px 32px rgba(126, 206, 192, 0.18);
+      --shadow-strong: 0 16px 48px rgba(126, 206, 192, 0.26);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(126, 206, 192, 0.18), transparent 26rem),
+        radial-gradient(circle at 82% 14%, rgba(181, 168, 216, 0.14), transparent 24rem),
+        linear-gradient(180deg, #f8fafa 0%, #f5f8f7 52%, #f2f5f3 100%);
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      background-image: radial-gradient(circle, rgba(126, 206, 192, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+
+    .shell {
+      width: min(1480px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 120px;
+      padding: 22px 26px;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 28px;
+      background:
+        radial-gradient(ellipse 60% 40% at 30% 30%, rgba(255, 255, 255, 0.22) 0%, transparent 54%),
+        linear-gradient(135deg, var(--mint) 0%, var(--sky) 50%, var(--lavender) 100%);
+      box-shadow: var(--shadow-strong);
+      color: #ffffff;
+    }
+
+    .hero::after {
+      position: absolute;
+      right: -70px;
+      bottom: -120px;
+      width: 220px;
+      height: 220px;
+      content: "";
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.18);
+      filter: blur(4px);
+      animation: floatGlow 10s var(--ease-smooth) infinite alternate;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .hero-meta {
+      display: grid;
+      gap: 10px;
+      min-width: 220px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(14px);
+    }
+
+    .meta-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.74);
+    }
+
+    .meta-value {
+      overflow: hidden;
+      font-size: 15px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin: 18px 0 0;
+      padding: 18px;
+      border: 2px solid rgba(126, 206, 192, 0.12);
+      border-radius: 30px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tab {
+      min-height: 42px;
+      padding: 10px 18px;
+      border: 2px solid rgba(126, 206, 192, 0.18);
+      border-radius: 9999px;
+      background: #fffefc;
+      color: #4a5568;
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      transition:
+        transform 220ms var(--ease-spring),
+        box-shadow 220ms var(--ease-smooth),
+        background 220ms var(--ease-smooth),
+        color 220ms var(--ease-smooth);
+    }
+
+    .tab:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 10px 24px rgba(126, 206, 192, 0.22);
+    }
+
+    .tab.active {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--mint) 0%, var(--sky) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 22px rgba(126, 206, 192, 0.36);
+    }
+
+    .file-picker {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 20px;
+      overflow: hidden;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, var(--mint) 0%, var(--sky) 100%);
+      box-shadow: 0 4px 16px rgba(126, 206, 192, 0.35);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 220ms var(--ease-spring), box-shadow 220ms var(--ease-smooth);
+    }
+
+    .file-picker:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 12px 28px rgba(126, 206, 192, 0.32);
+    }
+
+    .file-picker input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+
+    .table-card {
+      overflow: hidden;
+      border: 2px solid rgba(126, 206, 192, 0.12);
+      border-radius: 30px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .table-scroll {
+      max-height: calc(100vh - 250px);
+      min-height: 360px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      max-width: 340px;
+      padding: 13px 14px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      line-height: 1.55;
+      text-align: left;
+      vertical-align: top;
+      white-space: pre-line;
+      word-break: break-word;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: linear-gradient(135deg, var(--mint-light) 0%, rgba(126, 184, 218, 0.13) 100%);
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    tbody tr {
+      background: rgba(255, 254, 252, 0.72);
+      transition: background 160ms var(--ease-smooth);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(232, 246, 242, 0.28);
+    }
+
+    tbody tr:hover {
+      background: linear-gradient(135deg, rgba(232, 246, 242, 0.86) 0%, rgba(126, 184, 218, 0.1) 100%);
+    }
+
+    .section-row td {
+      background: linear-gradient(135deg, var(--sky-soft) 0%, var(--lavender-soft) 100%);
+      color: var(--text);
+      font-weight: 800;
+    }
+
+
+    .empty-cell {
+      color: #a0aec0;
+    }
+
+    .message {
+      padding: 28px;
+      color: var(--muted);
+      font-weight: 700;
+      line-height: 1.8;
+    }
+
+    .error {
+      color: #c05656;
+      background: #fed7d7;
+    }
+
+    @keyframes floatGlow {
+      from {
+        transform: translateY(0) rotate(0deg);
+      }
+      to {
+        transform: translateY(-18px) rotate(8deg);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        width: min(100% - 24px, 1480px);
+        padding-top: 16px;
+      }
+
+      .hero {
+        padding: 28px 24px;
+        border-radius: 30px;
+      }
+
+      .hero-content,
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-meta {
+        min-width: 0;
+      }
+
+      .table-scroll {
+        max-height: none;
+      }
+
+      .toolbar {
+        margin-top: 16px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .tab,
+      .file-picker {
+        width: 100%;
+      }
+
+      .tabs {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-content">
+        <div>
+          <h1>HyperMesh 结构建模规范</h1>
+          <p class="subtitle">按模块查看建模命名、单元类型、材料与基础单元尺寸。页面内容来自 Excel，替换或重新选择 Excel 后即可更新展示。</p>
+        </div>
+        <div class="hero-meta">
+          <span class="meta-label">当前 Excel</span>
+          <span class="meta-value" id="fileName">结构建模规范_整理版.xlsx</span>
+          <span class="meta-label">当前模块</span>
+          <span class="meta-value" id="activeSheet">加载中</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-scroll" id="tableWrap">
+        <div class="message">正在读取同目录 Excel...</div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="模块切换与文件选择">
+      <nav class="tabs" id="tabs" aria-label="Sheet 模块"></nav>
+      <label class="file-picker">
+        选择 Excel
+        <input id="fileInput" type="file" accept=".xlsx,.xls">
+      </label>
+    </section>
+  </main>
+
+  <script>
+    const DEFAULT_EXCEL = "结构建模规范_整理版.xlsx";
+    const state = {
+      workbook: null,
+      sheets: [],
+      activeSheet: "",
+      fileName: DEFAULT_EXCEL
+    };
+
+    const tabsEl = document.getElementById("tabs");
+    const tableWrapEl = document.getElementById("tableWrap");
+    const fileInputEl = document.getElementById("fileInput");
+    const fileNameEl = document.getElementById("fileName");
+    const activeSheetEl = document.getElementById("activeSheet");
+
+    function setMessage(text, isError = false) {
+      tableWrapEl.innerHTML = "";
+      const message = document.createElement("div");
+      message.className = `message${isError ? " error" : ""}`;
+      message.textContent = text;
+      tableWrapEl.appendChild(message);
+    }
+
+    function normalizeRows(sheet) {
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+      return rows
+        .map((row) => {
+          const clean = [...row];
+          while (clean.length && clean[0] === "") clean.shift();
+          while (clean.length && clean[clean.length - 1] === "") clean.pop();
+          return clean;
+        })
+        .filter((row) => row.some((cell) => String(cell).trim() !== ""));
+    }
+
+    function detectHeaderIndex(rows) {
+      const index = rows.findIndex((row) => String(row[0]).trim() === "序号");
+      return index >= 0 ? index : 0;
+    }
+
+    function rowIsSection(row) {
+      const nonEmpty = row.filter((cell) => String(cell).trim() !== "");
+      if (nonEmpty.length !== 1) return false;
+      const text = String(nonEmpty[0]).trim();
+      return text.includes("规范") || text.includes("部件") || text.includes("简化版") || text.includes("详细版") || text.startsWith("注：") || text.includes("名称全部");
+    }
+
+    function renderTabs() {
+      tabsEl.innerHTML = "";
+      state.sheets.forEach((sheetName) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `tab${sheetName === state.activeSheet ? " active" : ""}`;
+        button.textContent = sheetName;
+        button.addEventListener("click", () => {
+          state.activeSheet = sheetName;
+          renderTabs();
+          renderTable();
+        });
+        tabsEl.appendChild(button);
+      });
+    }
+
+    function renderTable() {
+      const sheet = state.workbook.Sheets[state.activeSheet];
+      const rows = normalizeRows(sheet);
+      const headerIndex = detectHeaderIndex(rows);
+      const maxCols = rows.reduce((max, row) => Math.max(max, row.length), 0);
+      const header = rows[headerIndex] || [];
+      const bodyRows = rows.filter((_, index) => index !== headerIndex);
+
+      tableWrapEl.innerHTML = "";
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+      const headerTr = document.createElement("tr");
+
+      for (let col = 0; col < maxCols; col += 1) {
+        const th = document.createElement("th");
+        th.textContent = header[col] || `列 ${col + 1}`;
+        headerTr.appendChild(th);
+      }
+
+      thead.appendChild(headerTr);
+      bodyRows.forEach((row) => {
+        const tr = document.createElement("tr");
+        if (rowIsSection(row)) {
+          tr.className = "section-row";
+          const td = document.createElement("td");
+          td.colSpan = maxCols;
+          td.textContent = row.find((cell) => String(cell).trim() !== "") || "";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          return;
+        }
+        for (let col = 0; col < maxCols; col += 1) {
+          const td = document.createElement("td");
+          const value = row[col] ?? "";
+          if (value === "") {
+            td.textContent = "—";
+            td.className = "empty-cell";
+          } else {
+            td.textContent = String(value);
+          }
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      });
+
+      table.append(thead, tbody);
+      tableWrapEl.appendChild(table);
+      fileNameEl.textContent = state.fileName;
+      activeSheetEl.textContent = state.activeSheet;
+    }
+
+    function loadWorkbookFromArrayBuffer(buffer, fileName) {
+      state.workbook = XLSX.read(buffer, { type: "array" });
+      state.sheets = state.workbook.SheetNames;
+      state.activeSheet = state.sheets[0] || "";
+      state.fileName = fileName;
+      if (!state.activeSheet) {
+        setMessage("Excel 中未找到任何 sheet。", true);
+        return;
+      }
+      renderTabs();
+      renderTable();
+    }
+
+    async function loadDefaultWorkbook() {
+      try {
+        const response = await fetch(DEFAULT_EXCEL, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const buffer = await response.arrayBuffer();
+        loadWorkbookFromArrayBuffer(buffer, DEFAULT_EXCEL);
+      } catch (error) {
+        console.error(error);
+        setMessage("未能自动读取同目录 Excel。请通过本地 HTTP 服务打开本页，或点击“选择 Excel”手动载入文件。", true);
+      }
+    }
+
+    fileInputEl.addEventListener("change", async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        const buffer = await file.arrayBuffer();
+        loadWorkbookFromArrayBuffer(buffer, file.name);
+      } catch (error) {
+        console.error(error);
+        setMessage("Excel 读取失败，请确认文件格式为 .xlsx 或 .xls。", true);
+      }
+    });
+
+    loadDefaultWorkbook();
+  </script>
+</body>
+</html>
