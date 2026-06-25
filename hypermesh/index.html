@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HyperMesh 仿真建模规范</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="excel-files.js"></script>
   <style>
     :root {
       --mint: #7ecec0;
@@ -330,7 +331,6 @@
   </main>
 
   <script>
-    const EXCEL_MANIFEST = "excel-files.json";
     const state = {
       workbook: null,
       sheets: [],
@@ -456,9 +456,7 @@
     }
 
     async function getDefaultExcelFile() {
-      const response = await fetch(EXCEL_MANIFEST, { cache: "no-store" });
-      if (!response.ok) throw new Error(`manifest HTTP ${response.status}`);
-      const files = await response.json();
+      const files = window.HYPERMESH_EXCEL_FILES || [];
       if (!Array.isArray(files) || files.length === 0) {
         throw new Error("manifest is empty");
       }
@@ -474,7 +472,7 @@
         loadWorkbookFromArrayBuffer(buffer, excelFile);
       } catch (error) {
         console.error(error);
-        setMessage("未能自动读取同目录第一个 Excel。请确认 excel-files.json 已列出 Excel 文件，并通过本地 HTTP 服务打开本页。", true);
+        setMessage("未能自动读取同目录第一个 Excel。请确认 excel-files.js 已列出 Excel 文件，并通过本地 HTTP 服务打开本页。", true);
       }
     }
 
